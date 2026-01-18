@@ -1,3 +1,5 @@
+'use client'
+
 import PublicLayout from '@/components/PublicLayout'
 
 export default function OfflinePage() {
