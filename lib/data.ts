@@ -152,13 +152,13 @@ export async function getProfileWithDetails(
   }))
 
   const careers = (careersResult.data || [])
-    .map(pc => pc.career as Career)
-    .filter(Boolean)
+    .map(pc => pc.career as unknown as Career)
+    .filter((c): c is Career => Boolean(c))
     .sort((a, b) => a.order - b.order)
 
   const furtherEducation = (educationResult.data || [])
-    .map(pe => pe.education as FurtherEducation)
-    .filter(Boolean)
+    .map(pe => pe.education as unknown as FurtherEducation)
+    .filter((e): e is FurtherEducation => Boolean(e))
     .sort((a, b) => a.order - b.order)
 
   return {
