@@ -123,7 +123,7 @@ export default function EducationPage() {
                       edu.type === 'hbo' ? 'bg-blue-100 text-blue-700' :
                       'bg-green-100 text-green-700'
                     }`}>
-                      {typeLabels[edu.type] || edu.type}
+                      {edu.type ? (typeLabels[edu.type] || edu.type) : '-'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-500 max-w-md truncate">{edu.description || '-'}</td>

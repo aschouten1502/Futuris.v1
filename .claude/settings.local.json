@@ -19,7 +19,14 @@
       "mcp__supabase__list_migrations",
       "mcp__supabase__get_logs",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: Futuris Bovenbouw App\n\nComplete school profile management system with:\n- Public pages for students/parents \\(mobile-first\\)\n- Admin CMS for school management\n- 5 education levels \\(VMBO-B, VMBO-K, Mavo, Mavo-Havo, ISK\\)\n- Profile management with phase support \\(onderbouw/bovenbouw\\)\n- Master subjects with level-specific variants\n- Career and further education linking\n- Supabase backend with RLS security\n\nStack: Next.js 14, Tailwind CSS, Supabase, TypeScript\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(gh auth status:*)",
+      "Bash(gh repo create:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix TypeScript error: handle null type in education page\n\nThe edu.type field can be null, so we need to check before using it as an index.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
     ]
   },
   "enableAllProjectMcpServers": true,
