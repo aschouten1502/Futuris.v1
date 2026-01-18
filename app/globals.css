@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-text antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    @apply bg-primary-100 text-primary-700;
+  }
+}
+
+@layer components {
+  /* Futuris-style pill buttons */
+  .btn-pill {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-button text-white font-medium rounded-pill
+           transition-all duration-200 ease-out
+           hover:bg-button-hover hover:shadow-md
+           active:bg-button-active active:scale-[0.98];
+  }
+
+  .btn-pill-outline {
+    @apply inline-flex items-center justify-center px-6 py-3
+           border-2 border-button text-button font-medium rounded-pill
+           transition-all duration-200 ease-out
+           hover:bg-button hover:text-white;
+  }
+
+  .btn-pill-teal {
+    @apply inline-flex items-center justify-center px-6 py-3
+           bg-futuris-teal text-white font-medium rounded-pill
+           transition-all duration-200 ease-out
+           hover:bg-futuris-teal-light hover:shadow-md
+           active:bg-futuris-teal-dark active:scale-[0.98];
+  }
+
+  /* Card base styles */
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-gray-100/50
+           transition-all duration-300 ease-out;
+  }
+
+  .card-interactive {
+    @apply card hover:shadow-card-hover hover:border-primary-200
+           hover:-translate-y-1;
+  }
+
+  /* Section title with accent line */
+  .section-title {
+    @apply text-lg font-semibold text-text relative pl-4
+           before:absolute before:left-0 before:top-1 before:bottom-1
+           before:w-1 before:bg-futuris-teal before:rounded-full;
+  }
+}
+
+@layer utilities {
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Text gradient for headings */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-futuris-teal to-primary-400;
+  }
+
+  /* Subtle animation for interactive elements */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  }
+}
