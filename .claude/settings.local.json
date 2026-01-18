@@ -29,7 +29,8 @@
       "Bash(git push)",
       "Bash(git push:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix TypeScript type casting in data.ts\n\nUse proper type guards and unknown casting for Supabase join results.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix offline page: add ''use client'' directive\n\nThe page has an onClick handler which requires it to be a client component.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix offline page: add ''use client'' directive\n\nThe page has an onClick handler which requires it to be a client component.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
