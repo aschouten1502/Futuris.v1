@@ -4,17 +4,15 @@ import Link from 'next/link'
 export default async function AdminDashboard() {
   const supabase = await createClient()
 
-  const [levels, profiles, subjects, careers, education] = await Promise.all([
-    supabase.from('levels').select('id', { count: 'exact', head: true }),
-    supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('subjects_master').select('id', { count: 'exact', head: true }),
+  const [directions, subjects, careers, education] = await Promise.all([
+    supabase.from('directions').select('id', { count: 'exact', head: true }),
+    supabase.from('subjects').select('id', { count: 'exact', head: true }),
     supabase.from('careers').select('id', { count: 'exact', head: true }),
     supabase.from('further_education').select('id', { count: 'exact', head: true }),
   ])
 
   const stats = [
-    { label: 'Niveaus', count: levels.count || 0, href: '/admin/levels', icon: '🏫', description: 'VMBO, Mavo, etc.' },
-    { label: 'Profielen', count: profiles.count || 0, href: '/admin/profiles', icon: '🎯', description: 'Sport, Tech, etc.' },
+    { label: 'Richtingen', count: directions.count || 0, href: '/admin/directions', icon: '🎯', description: 'D&P richtingen beheren' },
     { label: 'Vakken', count: subjects.count || 0, href: '/admin/subjects', icon: '📚', description: 'Nederlands, Engels, etc.' },
     { label: 'Beroepen', count: careers.count || 0, href: '/admin/careers', icon: '💼', description: 'Wat kun je worden?' },
     { label: 'Opleidingen', count: education.count || 0, href: '/admin/education', icon: '🎓', description: 'MBO, HBO, WO' },
@@ -28,7 +26,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <Link
             key={stat.href}
@@ -53,7 +51,7 @@ export default async function AdminDashboard() {
 
         <div className="space-y-6 text-gray-700">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="font-medium text-blue-900">De Futuris app helpt leerlingen en ouders om te zien welke profielen (richtingen) er zijn, welke vakken daarbij horen, en wat je later kunt worden.</p>
+            <p className="font-medium text-blue-900">De Futuris app helpt leerlingen en ouders om de 4 D&P richtingen te verkennen, te zien welke vakken daarbij horen, en wat je later kunt worden.</p>
           </div>
 
           <div>
@@ -62,29 +60,22 @@ export default async function AdminDashboard() {
               <div className="flex items-start gap-3">
                 <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm font-bold">1</span>
                 <div>
-                  <p className="font-medium">Niveaus (VMBO Basis, Mavo, etc.)</p>
-                  <p className="text-gray-600 text-sm">Dit zijn de opleidingsniveaus die jullie school aanbiedt.</p>
+                  <p className="font-medium">Richtingen (D&P Gezondheid, Kunst, Tech, Horeca)</p>
+                  <p className="text-gray-600 text-sm">Dit zijn de 4 bovenbouw richtingen. Elke richting heeft eigen vakken, beroepen en opleidingen.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm font-bold">2</span>
                 <div>
-                  <p className="font-medium">Profielen (Sport, Techniek, Zorg, etc.)</p>
-                  <p className="text-gray-600 text-sm">Elk niveau heeft profielen. Dit zijn de richtingen die leerlingen kunnen kiezen.</p>
+                  <p className="font-medium">Vakken (Nederlands, Engels, Wiskunde, etc.)</p>
+                  <p className="text-gray-600 text-sm">Vakken worden gekoppeld aan richtingen. Je geeft aan of een vak verplicht of een keuzevak is.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm font-bold">3</span>
                 <div>
-                  <p className="font-medium">Vakken (Nederlands, Engels, Wiskunde, etc.)</p>
-                  <p className="text-gray-600 text-sm">Vakken worden gekoppeld aan profielen. Je geeft aan of een vak verplicht of een keuzevak is.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm font-bold">4</span>
-                <div>
                   <p className="font-medium">Beroepen en Vervolgopleidingen</p>
-                  <p className="text-gray-600 text-sm">Wat kun je worden na dit profiel? Welke opleidingen kun je doen?</p>
+                  <p className="text-gray-600 text-sm">Wat kun je worden na deze richting? Welke opleidingen kun je doen?</p>
                 </div>
               </div>
             </div>
@@ -97,29 +88,28 @@ export default async function AdminDashboard() {
         <h2 className="text-xl font-bold text-gray-900 mb-4">Stap-voor-stap: Hoe beheer ik de app?</h2>
 
         <div className="space-y-6">
-          {/* Vakken bewerken */}
+          {/* Richting bewerken */}
           <div className="border-l-4 border-primary-500 pl-4">
             <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-xl">📚</span> Vakken aanpassen
+              <span className="text-xl">🎯</span> Richting aanpassen
             </h3>
             <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
-              <li>Klik hierboven op <strong>&quot;Vakken&quot;</strong></li>
-              <li>Klik op <strong>&quot;Bewerken&quot;</strong> naast het vak dat je wilt aanpassen</li>
-              <li>Vink aan voor welke niveaus dit vak beschikbaar is</li>
-              <li>Vul per niveau de beschrijving en lesuren in</li>
+              <li>Klik hierboven op <strong>&quot;Richtingen&quot;</strong></li>
+              <li>Klik op <strong>&quot;Bewerken&quot;</strong> naast de richting die je wilt aanpassen</li>
+              <li>Pas de naam, beschrijving, video of afbeelding aan</li>
+              <li>Beheer competenties, eigenschappen, vakken, beroepen en opleidingen</li>
               <li>Klik op <strong>&quot;Opslaan&quot;</strong></li>
             </ol>
           </div>
 
-          {/* Profielen bewerken */}
+          {/* Vakken beheren */}
           <div className="border-l-4 border-green-500 pl-4">
             <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-xl">🎯</span> Profiel vakken koppelen
+              <span className="text-xl">📚</span> Vakken koppelen aan richting
             </h3>
             <ol className="mt-2 space-y-2 text-gray-700 list-decimal list-inside">
-              <li>Klik hierboven op <strong>&quot;Profielen&quot;</strong></li>
-              <li>Klik op <strong>&quot;Bewerken&quot;</strong> naast het profiel</li>
-              <li>Scroll naar beneden naar <strong>&quot;Vakken koppelen&quot;</strong></li>
+              <li>Ga naar <strong>&quot;Richtingen&quot;</strong> en klik op <strong>&quot;Bewerken&quot;</strong></li>
+              <li>Scroll naar de sectie <strong>&quot;Vakken&quot;</strong></li>
               <li>Klik op <strong>&quot;Verplicht&quot;</strong> of <strong>&quot;Keuze&quot;</strong> bij elk vak</li>
               <li>Klik op <strong>&quot;Opslaan&quot;</strong></li>
             </ol>
@@ -135,6 +125,7 @@ export default async function AdminDashboard() {
               <li>Klik rechtsboven op <strong>&quot;+ Nieuw beroep&quot;</strong></li>
               <li>Vul de naam en beschrijving in</li>
               <li>Klik op <strong>&quot;Aanmaken&quot;</strong></li>
+              <li>Koppel het beroep vervolgens aan een richting</li>
             </ol>
           </div>
 
@@ -148,6 +139,7 @@ export default async function AdminDashboard() {
               <li>Klik rechtsboven op <strong>&quot;+ Nieuwe opleiding&quot;</strong></li>
               <li>Vul de naam in en kies het type (MBO/HBO/WO)</li>
               <li>Klik op <strong>&quot;Aanmaken&quot;</strong></li>
+              <li>Koppel de opleiding vervolgens aan een richting</li>
             </ol>
           </div>
         </div>

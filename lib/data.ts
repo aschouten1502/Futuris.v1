@@ -1,186 +1,177 @@
 import { supabase } from './supabaseClient'
 import type {
-  Level,
-  Profile,
+  Direction,
+  DirectionCompetency,
+  DirectionTrait,
+  DirectionDocument,
   Subject,
-  SubjectMaster,
-  SubjectVariant,
+  DirectionSubject,
   Career,
+  DirectionCareer,
   FurtherEducation,
-  LevelWithProfiles,
-  ProfileWithDetails,
+  DirectionEducation,
+  DirectionWithDetails,
 } from './types'
 
-// Data functies voor Levels, Profielen, Vakken, etc.
+// ============================================
+// RICHTINGEN
+// ============================================
 
-export async function getLevels(): Promise<Level[]> {
+export async function getDirections(): Promise<Direction[]> {
   const { data, error } = await supabase
-    .from('levels')
+    .from('directions')
     .select('*')
+    .eq('is_active', true)
     .order('order', { ascending: true })
 
   if (error) {
-    console.error('Error fetching levels:', error)
-    throw new Error('Kon niveaus niet laden')
+    console.error('Error fetching directions:', error)
+    throw new Error('Kon richtingen niet laden')
   }
 
   return data || []
 }
 
-export async function getLevelBySlug(slug: string): Promise<Level | null> {
+export async function getAllDirections(): Promise<Direction[]> {
   const { data, error } = await supabase
-    .from('levels')
+    .from('directions')
+    .select('*')
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching all directions:', error)
+    throw new Error('Kon richtingen niet laden')
+  }
+
+  return data || []
+}
+
+export async function getDirectionBySlug(slug: string): Promise<Direction | null> {
+  const { data, error } = await supabase
+    .from('directions')
     .select('*')
     .eq('slug', slug)
     .single()
 
   if (error) {
     if (error.code === 'PGRST116') return null
-    console.error('Error fetching level:', error)
-    throw new Error('Kon niveau niet laden')
+    console.error('Error fetching direction:', error)
+    throw new Error('Kon richting niet laden')
   }
 
   return data
 }
 
-export async function getLevelWithProfiles(slug: string): Promise<LevelWithProfiles | null> {
+export async function getDirectionById(id: string): Promise<Direction | null> {
   const { data, error } = await supabase
-    .from('levels')
-    .select(`
-      *,
-      profiles (*)
-    `)
-    .eq('slug', slug)
+    .from('directions')
+    .select('*')
+    .eq('id', id)
     .single()
 
   if (error) {
     if (error.code === 'PGRST116') return null
-    console.error('Error fetching level with profiles:', error)
-    throw new Error('Kon niveau niet laden')
+    console.error('Error fetching direction:', error)
+    throw new Error('Kon richting niet laden')
   }
 
-  return data as LevelWithProfiles
+  return data
 }
 
-export async function getProfiles(): Promise<Profile[]> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('order', { ascending: true })
-
-  if (error) {
-    console.error('Error fetching profiles:', error)
-    throw new Error('Kon profielen niet laden')
-  }
-
-  return data || []
-}
-
-export async function getProfilesByLevel(levelId: string): Promise<Profile[]> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('level_id', levelId)
-    .order('order', { ascending: true })
-
-  if (error) {
-    console.error('Error fetching profiles:', error)
-    throw new Error('Kon profielen niet laden')
-  }
-
-  return data || []
-}
-
-export async function getProfileWithDetails(
-  levelSlug: string,
-  profileSlug: string
-): Promise<ProfileWithDetails | null> {
-  // Eerst level ophalen
-  const level = await getLevelBySlug(levelSlug)
-  if (!level) return null
-
-  // Dan profiel ophalen
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('level_id', level.id)
-    .eq('slug', profileSlug)
-    .single()
-
-  if (profileError || !profile) {
-    if (profileError?.code === 'PGRST116') return null
-    console.error('Error fetching profile:', profileError)
-    throw new Error('Kon profiel niet laden')
-  }
+export async function getDirectionWithDetails(slug: string): Promise<DirectionWithDetails | null> {
+  // Eerst richting ophalen
+  const direction = await getDirectionBySlug(slug)
+  if (!direction) return null
 
   // Alle relaties ophalen in parallel
-  const [subjectsResult, careersResult, educationResult] = await Promise.all([
-    // Vakken via koppeltabel met nieuwe structuur
+  const [
+    competenciesResult,
+    traitsResult,
+    documentsResult,
+    subjectsResult,
+    careersResult,
+    educationResult,
+  ] = await Promise.all([
+    // Competenties
     supabase
-      .from('profile_subjects')
-      .select(`
-        *,
-        variant:subject_variants (
-          *,
-          subject:subjects_master (*)
-        )
-      `)
-      .eq('profile_id', profile.id)
+      .from('direction_competencies')
+      .select('*')
+      .eq('direction_id', direction.id)
       .order('order', { ascending: true }),
 
-    // Beroepen via koppeltabel
+    // Eigenschappen
     supabase
-      .from('profile_careers')
+      .from('direction_traits')
+      .select('*')
+      .eq('direction_id', direction.id)
+      .order('order', { ascending: true }),
+
+    // Documenten
+    supabase
+      .from('direction_documents')
+      .select('*')
+      .eq('direction_id', direction.id)
+      .order('order', { ascending: true }),
+
+    // Vakken met subject data
+    supabase
+      .from('direction_subjects')
       .select(`
+        *,
+        subject:subjects (*)
+      `)
+      .eq('direction_id', direction.id)
+      .order('order', { ascending: true }),
+
+    // Beroepen met career data
+    supabase
+      .from('direction_careers')
+      .select(`
+        *,
         career:careers (*)
       `)
-      .eq('profile_id', profile.id),
+      .eq('direction_id', direction.id)
+      .order('order', { ascending: true }),
 
-    // Vervolgopleidingen via koppeltabel
+    // Opleidingen met education data
     supabase
-      .from('profile_further_education')
+      .from('direction_education')
       .select(`
+        *,
         education:further_education (*)
       `)
-      .eq('profile_id', profile.id),
+      .eq('direction_id', direction.id)
+      .order('order', { ascending: true }),
   ])
 
-  // Data transformeren
-  const subjects = (subjectsResult.data || []).map(ps => ({
-    ...ps,
-    variant: ps.variant as SubjectVariant & { subject: SubjectMaster }
-  }))
-
-  const careers = (careersResult.data || [])
-    .map(pc => pc.career as unknown as Career)
-    .filter((c): c is Career => Boolean(c))
-    .sort((a, b) => a.order - b.order)
-
-  const furtherEducation = (educationResult.data || [])
-    .map(pe => pe.education as unknown as FurtherEducation)
-    .filter((e): e is FurtherEducation => Boolean(e))
-    .sort((a, b) => a.order - b.order)
+  // Vakken splitsen in required en optional
+  const allSubjects = (subjectsResult.data || []) as (DirectionSubject & { subject: Subject })[]
+  const requiredSubjects = allSubjects.filter(s => s.type === 'required')
+  const optionalSubjects = allSubjects.filter(s => s.type === 'optional')
 
   return {
-    ...profile,
-    level,
-    subjects,
-    careers,
-    further_education: furtherEducation,
+    ...direction,
+    competencies: (competenciesResult.data || []) as DirectionCompetency[],
+    traits: (traitsResult.data || []) as DirectionTrait[],
+    documents: (documentsResult.data || []) as DirectionDocument[],
+    subjects: {
+      required: requiredSubjects,
+      optional: optionalSubjects,
+    },
+    careers: (careersResult.data || []) as (DirectionCareer & { career: Career })[],
+    education: (educationResult.data || []) as (DirectionEducation & { education: FurtherEducation })[],
   }
 }
 
-export async function getSubjects(level?: string): Promise<Subject[]> {
-  let query = supabase
-    .from('subjects_v2')
+// ============================================
+// VAKKEN
+// ============================================
+
+export async function getSubjects(): Promise<Subject[]> {
+  const { data, error } = await supabase
+    .from('subjects')
     .select('*')
     .order('order', { ascending: true })
-
-  if (level) {
-    query = query.eq('level', level)
-  }
-
-  const { data, error } = await query
 
   if (error) {
     console.error('Error fetching subjects:', error)
@@ -190,12 +181,11 @@ export async function getSubjects(level?: string): Promise<Subject[]> {
   return data || []
 }
 
-export async function getSubjectBySlug(slug: string, level: string): Promise<Subject | null> {
+export async function getSubjectById(id: string): Promise<Subject | null> {
   const { data, error } = await supabase
-    .from('subjects_v2')
+    .from('subjects')
     .select('*')
-    .eq('slug', slug)
-    .eq('level', level)
+    .eq('id', id)
     .single()
 
   if (error) {
@@ -206,6 +196,10 @@ export async function getSubjectBySlug(slug: string, level: string): Promise<Sub
 
   return data
 }
+
+// ============================================
+// BEROEPEN
+// ============================================
 
 export async function getCareers(): Promise<Career[]> {
   const { data, error } = await supabase
@@ -221,6 +215,26 @@ export async function getCareers(): Promise<Career[]> {
   return data || []
 }
 
+export async function getCareerById(id: string): Promise<Career | null> {
+  const { data, error } = await supabase
+    .from('careers')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return null
+    console.error('Error fetching career:', error)
+    throw new Error('Kon beroep niet laden')
+  }
+
+  return data
+}
+
+// ============================================
+// OPLEIDINGEN
+// ============================================
+
 export async function getFurtherEducation(): Promise<FurtherEducation[]> {
   const { data, error } = await supabase
     .from('further_education')
@@ -235,81 +249,141 @@ export async function getFurtherEducation(): Promise<FurtherEducation[]> {
   return data || []
 }
 
-// ============================================
-// Nieuwe functies voor Master Vakken + Varianten
-// ============================================
-
-export async function getSubjectsMaster(): Promise<(SubjectMaster & { variant_count: number })[]> {
+export async function getFurtherEducationById(id: string): Promise<FurtherEducation | null> {
   const { data, error } = await supabase
-    .from('subjects_master')
-    .select(`
-      *,
-      variants:subject_variants (id)
-    `)
-    .order('order', { ascending: true })
-
-  if (error) {
-    console.error('Error fetching subjects master:', error)
-    throw new Error('Kon vakken niet laden')
-  }
-
-  // Tel varianten
-  return (data || []).map(subject => ({
-    ...subject,
-    variant_count: subject.variants?.length || 0,
-    variants: undefined // Verwijder raw variants array
-  }))
-}
-
-export async function getSubjectMasterById(id: string): Promise<SubjectMaster | null> {
-  const { data, error } = await supabase
-    .from('subjects_master')
+    .from('further_education')
     .select('*')
     .eq('id', id)
     .single()
 
   if (error) {
     if (error.code === 'PGRST116') return null
-    console.error('Error fetching subject master:', error)
-    throw new Error('Kon vak niet laden')
+    console.error('Error fetching education:', error)
+    throw new Error('Kon opleiding niet laden')
   }
 
   return data
 }
 
-export async function getSubjectWithVariants(id: string): Promise<(SubjectMaster & { variants: SubjectVariant[] }) | null> {
+// ============================================
+// ADMIN: COMPETENTIES
+// ============================================
+
+export async function getCompetenciesByDirection(directionId: string): Promise<DirectionCompetency[]> {
   const { data, error } = await supabase
-    .from('subjects_master')
-    .select(`
-      *,
-      variants:subject_variants (*)
-    `)
-    .eq('id', id)
-    .single()
+    .from('direction_competencies')
+    .select('*')
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
 
   if (error) {
-    if (error.code === 'PGRST116') return null
-    console.error('Error fetching subject with variants:', error)
-    throw new Error('Kon vak niet laden')
+    console.error('Error fetching competencies:', error)
+    throw new Error('Kon competenties niet laden')
   }
 
-  return data as SubjectMaster & { variants: SubjectVariant[] }
+  return data || []
 }
 
-export async function getSubjectVariantsForLevel(level: string): Promise<(SubjectVariant & { subject: SubjectMaster })[]> {
+// ============================================
+// ADMIN: EIGENSCHAPPEN
+// ============================================
+
+export async function getTraitsByDirection(directionId: string): Promise<DirectionTrait[]> {
   const { data, error } = await supabase
-    .from('subject_variants')
-    .select(`
-      *,
-      subject:subjects_master (*)
-    `)
-    .eq('level', level)
+    .from('direction_traits')
+    .select('*')
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
 
   if (error) {
-    console.error('Error fetching variants for level:', error)
-    throw new Error('Kon vakken voor niveau niet laden')
+    console.error('Error fetching traits:', error)
+    throw new Error('Kon eigenschappen niet laden')
   }
 
-  return (data || []) as (SubjectVariant & { subject: SubjectMaster })[]
+  return data || []
 }
 
+// ============================================
+// ADMIN: DOCUMENTEN
+// ============================================
+
+export async function getDocumentsByDirection(directionId: string): Promise<DirectionDocument[]> {
+  const { data, error } = await supabase
+    .from('direction_documents')
+    .select('*')
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching documents:', error)
+    throw new Error('Kon documenten niet laden')
+  }
+
+  return data || []
+}
+
+// ============================================
+// ADMIN: RICHTING VAKKEN
+// ============================================
+
+export async function getSubjectsByDirection(directionId: string): Promise<(DirectionSubject & { subject: Subject })[]> {
+  const { data, error } = await supabase
+    .from('direction_subjects')
+    .select(`
+      *,
+      subject:subjects (*)
+    `)
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching direction subjects:', error)
+    throw new Error('Kon vakken niet laden')
+  }
+
+  return (data || []) as (DirectionSubject & { subject: Subject })[]
+}
+
+// ============================================
+// ADMIN: RICHTING BEROEPEN
+// ============================================
+
+export async function getCareersByDirection(directionId: string): Promise<(DirectionCareer & { career: Career })[]> {
+  const { data, error } = await supabase
+    .from('direction_careers')
+    .select(`
+      *,
+      career:careers (*)
+    `)
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching direction careers:', error)
+    throw new Error('Kon beroepen niet laden')
+  }
+
+  return (data || []) as (DirectionCareer & { career: Career })[]
+}
+
+// ============================================
+// ADMIN: RICHTING OPLEIDINGEN
+// ============================================
+
+export async function getEducationByDirection(directionId: string): Promise<(DirectionEducation & { education: FurtherEducation })[]> {
+  const { data, error } = await supabase
+    .from('direction_education')
+    .select(`
+      *,
+      education:further_education (*)
+    `)
+    .eq('direction_id', directionId)
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching direction education:', error)
+    throw new Error('Kon opleidingen niet laden')
+  }
+
+  return (data || []) as (DirectionEducation & { education: FurtherEducation })[]
+}

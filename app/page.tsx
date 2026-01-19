@@ -1,11 +1,11 @@
-import { getLevels } from '@/lib/data'
-import { LevelCard } from '@/components/LevelCard'
+import { getDirections } from '@/lib/data'
+import { DirectionCard } from '@/components/DirectionCard'
 import PublicLayout from '@/components/PublicLayout'
 
 export const revalidate = 60
 
 export default async function HomePage() {
-  const levels = await getLevels()
+  const directions = await getDirections()
 
   return (
     <PublicLayout>
@@ -18,7 +18,7 @@ export default async function HomePage() {
         <div className="relative">
           {/* Badge */}
           <span className="inline-block px-3 py-1 mb-4 text-sm font-medium bg-futuris-teal/10 text-futuris-teal rounded-full">
-            Bovenbouw Keuzegids
+            D&P Bovenbouw
           </span>
 
           {/* Main heading */}
@@ -28,23 +28,33 @@ export default async function HomePage() {
 
           {/* Subtitle */}
           <p className="text-text-muted text-lg max-w-xl">
-            Kies je niveau om de beschikbare profielen en vakken te bekijken.
-            Ontdek welke studie- en beroepsmogelijkheden bij jou passen.
+            Welke D&P richting past bij jou? Klik op een richting om te ontdekken
+            welke vakken, beroepen en opleidingen daarbij horen.
           </p>
         </div>
       </div>
 
-      {levels.length === 0 ? (
+      {directions.length === 0 ? (
         <div className="text-center py-12 text-text-muted">
-          <p>Geen niveaus gevonden.</p>
+          <p>Geen richtingen gevonden.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {levels.map((level) => (
-            <LevelCard key={level.id} level={level} />
+          {directions.map((direction) => (
+            <DirectionCard key={direction.id} direction={direction} />
           ))}
         </div>
       )}
+
+      {/* Info box */}
+      <div className="mt-8 p-4 bg-futuris-teal/5 rounded-xl border border-futuris-teal/10">
+        <h3 className="font-medium text-futuris-teal mb-2">Wat is D&P?</h3>
+        <p className="text-sm text-text-muted">
+          D&P staat voor &quot;Dienstverlening en Producten&quot;. Dit zijn de
+          vier richtingen die je kunt kiezen in de bovenbouw. Elke richting
+          bereidt je voor op specifieke vervolgopleidingen en beroepen.
+        </p>
+      </div>
     </PublicLayout>
   )
 }

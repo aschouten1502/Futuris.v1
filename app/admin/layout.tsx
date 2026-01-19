@@ -7,8 +7,7 @@ import { useRouter } from 'next/navigation'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/levels', label: 'Niveaus', icon: '🏫' },
-  { href: '/admin/profiles', label: 'Profielen', icon: '🎓' },
+  { href: '/admin/directions', label: 'Richtingen', icon: '🎯' },
   { href: '/admin/subjects', label: 'Vakken', icon: '📚' },
   { href: '/admin/careers', label: 'Beroepen', icon: '💼' },
   { href: '/admin/education', label: 'Opleidingen', icon: '🎓' },
