@@ -4,6 +4,26 @@ import { getDirectionWithDetails, getDirections } from '@/lib/data'
 import PublicLayout from '@/components/PublicLayout'
 import type { Metadata } from 'next'
 
+// Convert various YouTube URL formats to embed URL
+function getYouTubeEmbedUrl(url: string): string | null {
+  if (!url) return null
+
+  // Already embed format
+  if (url.includes('youtube.com/embed/')) {
+    return url.startsWith('http') ? url : `https://${url}`
+  }
+
+  // Extract video ID from various formats (watch, youtu.be, etc.)
+  const pattern = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/
+  const match = url.match(pattern)
+
+  if (match) {
+    return `https://www.youtube.com/embed/${match[1]}`
+  }
+
+  return null
+}
+
 export const revalidate = 60
 
 interface PageProps {
@@ -71,16 +91,20 @@ export default async function DirectionPage({ params }: PageProps) {
         </div>
 
         {/* Video embed */}
-        {direction.video_url && (
-          <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 mb-4">
-            <iframe
-              src={direction.video_url}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        )}
+        {direction.video_url && (() => {
+          const embedUrl = getYouTubeEmbedUrl(direction.video_url)
+          return embedUrl ? (
+            <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 mb-4">
+              <iframe
+                src={embedUrl}
+                title="Video over deze richting"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          ) : null
+        })()}
 
         {/* Full description */}
         {direction.full_description && (
