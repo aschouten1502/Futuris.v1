@@ -1,4 +1,4 @@
-const CACHE_NAME = 'futuris-v1';
+const CACHE_NAME = 'futuris-v2';
 const OFFLINE_URL = '/offline';
 
 // Assets to cache immediately on install
@@ -10,6 +10,13 @@ const PRECACHE_ASSETS = [
   '/apple-touch-icon.png',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
+];
+
+// External URLs to skip (don't cache, let browser handle)
+const SKIP_URLS = [
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'supabase.co'
 ];
 
 // Install event - precache essential assets
@@ -44,8 +51,8 @@ self.addEventListener('fetch', (event) => {
   // Skip admin routes - don't cache admin panel
   if (event.request.url.includes('/admin')) return;
 
-  // Skip API calls to Supabase
-  if (event.request.url.includes('supabase.co')) return;
+  // Skip external URLs (fonts, APIs, etc.) - let browser handle directly
+  if (SKIP_URLS.some(url => event.request.url.includes(url))) return;
 
   event.respondWith(
     fetch(event.request)
