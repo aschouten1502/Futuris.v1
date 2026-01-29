@@ -93,7 +93,7 @@ export function DirectionBasicInfo({ direction, onChange }: DirectionBasicInfoPr
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Intro tekst beroepen/opleidingen
-            <span className="font-normal text-gray-400 ml-1">(optioneel, voor D&P sectie)</span>
+            <span className="font-normal text-gray-500 ml-1">(optioneel, voor D&P sectie)</span>
           </label>
           <textarea
             value={direction.careers_intro || ''}

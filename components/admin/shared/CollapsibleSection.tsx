@@ -40,12 +40,12 @@ export function CollapsibleSection({
               )}
             </div>
             {subtitle && (
-              <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm text-gray-600 mt-0.5">{subtitle}</p>
             )}
           </div>
         </div>
         <svg
-          className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

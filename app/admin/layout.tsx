@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -105,6 +105,34 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [isInIframe, setIsInIframe] = useState(false)
+
+  useEffect(() => {
+    setIsInIframe(window.self !== window.top)
+  }, [])
+
+  // Block admin access when in preview iframe
+  if (isInIframe) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+        <div className="text-center max-w-sm">
+          <p className="text-6xl mb-4">🚫</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">
+            Preview modus
+          </h1>
+          <p className="text-gray-500 mb-6">
+            Je kan in de preview niet naar het beheer platform.
+          </p>
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-futuris-teal text-white rounded-lg font-medium hover:bg-futuris-teal/90 transition-colors"
+          >
+            Ga naar homepagina
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   if (pathname === '/admin/login') {
     return <>{children}</>
@@ -128,7 +156,7 @@ export default function AdminLayout({
           <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
             {/* Content section */}
             <div>
-              <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Content
               </p>
               <div className="space-y-1">
@@ -140,7 +168,7 @@ export default function AdminLayout({
 
             {/* System section */}
             <div>
-              <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <p className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Systeem
               </p>
               <div className="space-y-1">
@@ -188,7 +216,7 @@ export default function AdminLayout({
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             title="Pagina verversen"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

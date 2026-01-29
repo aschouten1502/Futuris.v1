@@ -353,7 +353,7 @@ export default function EditDirectionPage() {
                     key={item.label}
                     className="flex items-center justify-between text-xs"
                   >
-                    <span className="text-gray-500">{item.label}</span>
+                    <span className="text-gray-600">{item.label}</span>
                     <span className="text-gray-700 font-medium">
                       {'count' in item ? item.count : 'done' in item ? (item.done ? '✓' : '—') : item.value}
                     </span>
@@ -372,7 +372,7 @@ export default function EditDirectionPage() {
                 <span className="text-lg">🎯</span>
                 <div>
                   <p className="text-xs font-semibold text-gray-700 group-hover:text-primary-700">Rondleiding</p>
-                  <p className="text-xs text-gray-400">Leer hoe alles werkt</p>
+                  <p className="text-xs text-gray-500">Leer hoe alles werkt</p>
                 </div>
               </div>
             </button>
