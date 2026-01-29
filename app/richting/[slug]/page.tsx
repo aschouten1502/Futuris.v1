@@ -184,6 +184,14 @@ export default async function DirectionPage({ params }: PageProps) {
                 </span>
                 Passende vakken bij {direction.name}
               </h2>
+              <div className="bg-surface-lavender-light/60 rounded-xl border border-surface-lavender/30 p-4 mb-4">
+                <p className="text-sm text-text-muted leading-relaxed">
+                  Naast de twee verplichte onderdelen mag je twee keuzevakken kiezen vanuit alle
+                  richtingen. Hieronder worden de vakken benoemd die bij {direction.name} aansluiten,
+                  maar spreken deze je niet aan? Dan kun je ook kiezen uit keuzevakken van andere
+                  richtingen. Je mag twee vakken kiezen uit alle beschikbare keuzevakken.
+                </p>
+              </div>
               <div
                 className="bg-white rounded-xl border-2 divide-y divide-surface-lavender/20"
                 style={{ borderColor: `${direction.color}40` }}
