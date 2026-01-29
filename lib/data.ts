@@ -32,6 +32,22 @@ export async function getDirections(): Promise<Direction[]> {
   return data || []
 }
 
+export async function getDirectionsByCategory(category: 'dp' | 'mavo'): Promise<Direction[]> {
+  const { data, error } = await supabase
+    .from('directions')
+    .select('*')
+    .eq('is_active', true)
+    .eq('category', category)
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching directions by category:', error)
+    throw new Error('Kon richtingen niet laden')
+  }
+
+  return data || []
+}
+
 export async function getAllDirections(): Promise<Direction[]> {
   const { data, error } = await supabase
     .from('directions')
@@ -60,6 +76,18 @@ export async function getDirectionBySlug(slug: string): Promise<Direction | null
   }
 
   return data
+}
+
+export async function deleteDirection(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('directions')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Error deleting direction:', error)
+    throw new Error('Kon richting niet verwijderen')
+  }
 }
 
 export async function getDirectionById(id: string): Promise<Direction | null> {
@@ -91,6 +119,7 @@ export async function getDirectionWithDetails(slug: string): Promise<DirectionWi
     subjectsResult,
     careersResult,
     educationResult,
+    allSubjectsResult,
   ] = await Promise.all([
     // Competenties
     supabase
@@ -142,12 +171,19 @@ export async function getDirectionWithDetails(slug: string): Promise<DirectionWi
       `)
       .eq('direction_id', direction.id)
       .order('order', { ascending: true }),
+
+    // Alle vakken (voor keuzevakken overzicht)
+    supabase
+      .from('subjects')
+      .select('*')
+      .order('order', { ascending: true }),
   ])
 
-  // Vakken splitsen in required en optional
-  const allSubjects = (subjectsResult.data || []) as (DirectionSubject & { subject: Subject })[]
-  const requiredSubjects = allSubjects.filter(s => s.type === 'required')
-  const optionalSubjects = allSubjects.filter(s => s.type === 'optional')
+  // Vakken splitsen in 3 groepen: passend, algemeen verplicht, algemeen keuze
+  const linkedSubjects = (subjectsResult.data || []) as (DirectionSubject & { subject: Subject })[]
+  const fitting = linkedSubjects.filter(s => s.is_fitting)
+  const generalRequired = linkedSubjects.filter(s => !s.is_fitting && s.type === 'required')
+  const generalOptional = linkedSubjects.filter(s => !s.is_fitting && s.type === 'optional')
 
   return {
     ...direction,
@@ -155,9 +191,11 @@ export async function getDirectionWithDetails(slug: string): Promise<DirectionWi
     traits: (traitsResult.data || []) as DirectionTrait[],
     documents: (documentsResult.data || []) as DirectionDocument[],
     subjects: {
-      required: requiredSubjects,
-      optional: optionalSubjects,
+      fitting,
+      generalRequired,
+      generalOptional,
     },
+    allSubjects: (allSubjectsResult.data || []) as Subject[],
     careers: (careersResult.data || []) as (DirectionCareer & { career: Career })[],
     education: (educationResult.data || []) as (DirectionEducation & { education: FurtherEducation })[],
   }

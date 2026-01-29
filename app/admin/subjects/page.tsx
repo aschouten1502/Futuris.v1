@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Subject } from '@/lib/types'
 import { Toast, useToast } from '@/components/ui/Toast'
+import { EmojiPicker } from '@/components/admin/shared/EmojiPicker'
 
 interface EditModalProps {
   subject: Subject | null
@@ -39,12 +40,9 @@ function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
           <div className="grid grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Icoon</label>
-              <input
-                type="text"
+              <EmojiPicker
                 value={form.icon}
-                onChange={e => setForm({ ...form, icon: e.target.value })}
-                placeholder="📚"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-center text-2xl"
+                onChange={emoji => setForm({ ...form, icon: emoji })}
               />
             </div>
             <div className="col-span-3">

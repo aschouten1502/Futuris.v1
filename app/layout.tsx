@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cardo } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
   display: 'swap',
-  variable: '--font-inter',
-})
-
-const cardo = Cardo({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-cardo',
+  variable: '--font-roboto',
 })
 
 export const metadata: Metadata = {
@@ -53,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="nl" className={`${inter.variable} ${cardo.variable}`}>
+    <html lang="nl" className={roboto.variable}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />

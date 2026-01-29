@@ -16,6 +16,8 @@ export interface Direction {
   icon: string | null
   order: number
   is_active: boolean
+  category: 'dp' | 'mavo'
+  careers_intro: string | null
   created_at?: string
   updated_at?: string
 }
@@ -61,7 +63,8 @@ export interface DirectionSubject {
   id: string
   direction_id: string
   subject_id: string
-  type: 'required' | 'optional'
+  type: 'required' | 'optional' | null
+  is_fitting: boolean
   hours_per_week: number
   notes: string | null
   order: number
@@ -115,9 +118,11 @@ export interface DirectionWithDetails extends Direction {
   traits: DirectionTrait[]
   documents: DirectionDocument[]
   subjects: {
-    required: (DirectionSubject & { subject: Subject })[]
-    optional: (DirectionSubject & { subject: Subject })[]
+    fitting: (DirectionSubject & { subject: Subject })[]
+    generalRequired: (DirectionSubject & { subject: Subject })[]
+    generalOptional: (DirectionSubject & { subject: Subject })[]
   }
+  allSubjects: Subject[]
   careers: (DirectionCareer & { career: Career })[]
   education: (DirectionEducation & { education: FurtherEducation })[]
 }
@@ -137,6 +142,8 @@ export interface DirectionFormData {
   icon: string
   order: number
   is_active: boolean
+  category: 'dp' | 'mavo'
+  careers_intro: string
 }
 
 export interface CompetencyFormData {

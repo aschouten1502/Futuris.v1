@@ -4,14 +4,95 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Career } from '@/lib/types'
 import { Toast, useToast } from '@/components/ui/Toast'
+import { EmojiPicker } from '@/components/admin/shared/EmojiPicker'
+
+interface EditModalProps {
+  career: Career | null
+  isNew: boolean
+  onClose: () => void
+  onSave: (data: Partial<Career>) => void
+}
+
+function EditModal({ career, isNew, onClose, onSave }: EditModalProps) {
+  const [form, setForm] = useState({
+    name: career?.name || '',
+    description: career?.description || '',
+    icon: career?.icon || '',
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave(form)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900">
+            {isNew ? 'Nieuw beroep' : 'Beroep bewerken'}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Icoon</label>
+              <EmojiPicker
+                value={form.icon}
+                onChange={emoji => setForm({ ...form, icon: emoji })}
+              />
+            </div>
+            <div className="col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Naam *</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                placeholder="Naam van het beroep"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Beschrijving</label>
+            <textarea
+              value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
+              placeholder="Korte beschrijving van het beroep"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="submit"
+              className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700"
+            >
+              {isNew ? 'Toevoegen' : 'Opslaan'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Annuleren
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 export default function CareersPage() {
   const [careers, setCareers] = useState<Career[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editForm, setEditForm] = useState({ name: '', description: '', icon: '' })
-  const [newForm, setNewForm] = useState({ name: '', description: '', icon: '' })
-  const [showNew, setShowNew] = useState(false)
+  const [editingCareer, setEditingCareer] = useState<Career | null>(null)
+  const [showNewModal, setShowNewModal] = useState(false)
   const { toast, showToast, hideToast } = useToast()
   const supabase = createClient()
 
@@ -33,16 +114,16 @@ export default function CareersPage() {
     fetchCareers()
   }, [])
 
-  const handleCreate = async () => {
-    if (!newForm.name.trim()) {
+  const handleCreate = async (data: Partial<Career>) => {
+    if (!data.name?.trim()) {
       showToast('Vul een naam in', 'error')
       return
     }
 
     const { error } = await supabase.from('careers').insert({
-      name: newForm.name,
-      description: newForm.description || null,
-      icon: newForm.icon || null,
+      name: data.name,
+      description: data.description || null,
+      icon: data.icon || null,
       order: careers.length,
     })
 
@@ -50,39 +131,32 @@ export default function CareersPage() {
       showToast('Fout bij aanmaken', 'error')
     } else {
       showToast('Beroep aangemaakt', 'success')
-      setNewForm({ name: '', description: '', icon: '' })
-      setShowNew(false)
+      setShowNewModal(false)
       fetchCareers()
     }
   }
 
-  const startEdit = (career: Career) => {
-    setEditingId(career.id)
-    setEditForm({
-      name: career.name,
-      description: career.description || '',
-      icon: career.icon || '',
-    })
-  }
-
-  const handleUpdate = async () => {
-    if (!editingId || !editForm.name.trim()) return
+  const handleUpdate = async (data: Partial<Career>) => {
+    if (!editingCareer || !data.name?.trim()) {
+      showToast('Vul een naam in', 'error')
+      return
+    }
 
     const { error } = await supabase
       .from('careers')
       .update({
-        name: editForm.name,
-        description: editForm.description || null,
-        icon: editForm.icon || null,
+        name: data.name,
+        description: data.description || null,
+        icon: data.icon || null,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', editingId)
+      .eq('id', editingCareer.id)
 
     if (error) {
       showToast('Fout bij opslaan', 'error')
     } else {
       showToast('Opgeslagen', 'success')
-      setEditingId(null)
+      setEditingCareer(null)
       fetchCareers()
     }
   }
@@ -113,155 +187,70 @@ export default function CareersPage() {
         </div>
         <button
           type="button"
-          onClick={() => setShowNew(true)}
+          onClick={() => setShowNewModal(true)}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
         >
           + Nieuw beroep
         </button>
       </div>
 
-      {/* New form */}
-      {showNew && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <h3 className="font-medium text-gray-900 mb-3">Nieuw beroep</h3>
-          <div className="space-y-3">
-            <div className="grid grid-cols-4 gap-4">
-              <input
-                type="text"
-                value={newForm.icon}
-                onChange={e => setNewForm({ ...newForm, icon: e.target.value })}
-                placeholder="👤"
-                className="px-3 py-2 border border-gray-300 rounded-lg text-center"
-              />
-              <input
-                type="text"
-                value={newForm.name}
-                onChange={e => setNewForm({ ...newForm, name: e.target.value })}
-                placeholder="Naam"
-                className="col-span-3 px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-            <input
-              type="text"
-              value={newForm.description}
-              onChange={e => setNewForm({ ...newForm, description: e.target.value })}
-              placeholder="Beschrijving (optioneel)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            />
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleCreate}
-                className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700"
-              >
-                Toevoegen
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowNew(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Annuleren
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {careers.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
           Nog geen beroepen toegevoegd.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Icoon</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Naam</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Beschrijving</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">Acties</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {careers.map((career) => (
-                <tr key={career.id} className="hover:bg-gray-50">
-                  {editingId === career.id ? (
-                    <>
-                      <td className="px-6 py-3">
-                        <input
-                          type="text"
-                          value={editForm.icon}
-                          onChange={e => setEditForm({ ...editForm, icon: e.target.value })}
-                          placeholder="👤"
-                          className="w-12 px-2 py-1 border border-gray-300 rounded text-center"
-                        />
-                      </td>
-                      <td className="px-6 py-3">
-                        <input
-                          type="text"
-                          value={editForm.name}
-                          onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-                          placeholder="Naam"
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      </td>
-                      <td className="px-6 py-3">
-                        <input
-                          type="text"
-                          value={editForm.description}
-                          onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                          placeholder="Beschrijving"
-                          className="w-full px-2 py-1 border border-gray-300 rounded"
-                        />
-                      </td>
-                      <td className="px-6 py-3 text-right space-x-2">
-                        <button
-                          type="button"
-                          onClick={handleUpdate}
-                          className="text-green-600 hover:text-green-700 font-medium"
-                        >
-                          Opslaan
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className="text-gray-600 hover:text-gray-700 font-medium"
-                        >
-                          Annuleren
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-6 py-4">
-                        <span className="text-xl">{career.icon || '👤'}</span>
-                      </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">{career.name}</td>
-                      <td className="px-6 py-4 text-gray-500 text-sm max-w-md truncate">{career.description || '-'}</td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(career)}
-                          className="text-primary-600 hover:text-primary-700 font-medium"
-                        >
-                          Bewerken
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(career.id)}
-                          className="text-red-600 hover:text-red-700 font-medium"
-                        >
-                          Verwijderen
-                        </button>
-                      </td>
-                    </>
+        <div className="grid gap-4">
+          {careers.map((career) => (
+            <div
+              key={career.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start gap-4">
+                <div className="text-3xl">{career.icon || '👤'}</div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900">{career.name}</h3>
+                  {career.description && (
+                    <p className="text-sm text-gray-500 mt-0.5">{career.description}</p>
                   )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCareer(career)}
+                    className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                  >
+                    Bewerken
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(career.id)}
+                    className="text-red-600 hover:text-red-700 font-medium text-sm"
+                  >
+                    Verwijderen
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      )}
+
+      {editingCareer && (
+        <EditModal
+          career={editingCareer}
+          isNew={false}
+          onClose={() => setEditingCareer(null)}
+          onSave={handleUpdate}
+        />
+      )}
+
+      {showNewModal && (
+        <EditModal
+          career={null}
+          isNew={true}
+          onClose={() => setShowNewModal(false)}
+          onSave={handleCreate}
+        />
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}

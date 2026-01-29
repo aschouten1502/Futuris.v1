@@ -1,17 +1,101 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/directions', label: 'Richtingen', icon: '🎯' },
-  { href: '/admin/subjects', label: 'Vakken', icon: '📚' },
-  { href: '/admin/careers', label: 'Beroepen', icon: '💼' },
-  { href: '/admin/education', label: 'Opleidingen', icon: '🎓' },
+interface NavItem {
+  href: string
+  label: string
+}
+
+interface NavGroup {
+  label: string
+  icon: string
+  items: NavItem[]
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: 'Richtingen',
+    icon: '🎯',
+    items: [
+      { href: '/admin/directions', label: 'Overzicht' },
+      { href: '/admin/directions/new', label: '+ Nieuwe richting' },
+    ],
+  },
+  {
+    label: 'Stamgegevens',
+    icon: '📋',
+    items: [
+      { href: '/admin/subjects', label: 'Vakken' },
+      { href: '/admin/careers', label: 'Beroepen' },
+      { href: '/admin/education', label: 'Opleidingen' },
+    ],
+  },
 ]
+
+function NavFolder({ group, pathname }: { group: NavGroup; pathname: string }) {
+  const isGroupActive = group.items.some(item =>
+    pathname === item.href || pathname.startsWith(item.href + '/')
+  )
+  const [isOpen, setIsOpen] = useState(isGroupActive)
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+          isGroupActive
+            ? 'text-futuris-teal'
+            : 'text-text-muted hover:bg-gray-100 hover:text-text'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <span>{group.icon}</span>
+          <span>{group.label}</span>
+        </div>
+        <svg
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-200 ${
+          isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="ml-6 mt-1 space-y-0.5 border-l-2 border-gray-200 pl-3">
+          {group.items.map((item) => {
+            const isActive = pathname === item.href ||
+              (item.href !== '/admin/directions' && pathname.startsWith(item.href + '/'))
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`block px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  isActive
+                    ? 'bg-futuris-teal/10 text-futuris-teal font-medium'
+                    : 'text-text-muted hover:bg-gray-100 hover:text-text'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function AdminLayout({
   children,
@@ -31,6 +115,8 @@ export default function AdminLayout({
     router.push('/admin/login')
   }
 
+  const isDashboardActive = pathname === '/admin'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200">
@@ -39,29 +125,54 @@ export default function AdminLayout({
             <Link href="/" className="text-xl font-bold text-futuris-teal">Futuris Admin</Link>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href ||
-                (item.href !== '/admin' && pathname.startsWith(item.href))
-              return (
+          <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+            {/* Content section */}
+            <div>
+              <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Content
+              </p>
+              <div className="space-y-1">
+                {navGroups.map((group) => (
+                  <NavFolder key={group.label} group={group} pathname={pathname} />
+                ))}
+              </div>
+            </div>
+
+            {/* System section */}
+            <div>
+              <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Systeem
+              </p>
+              <div className="space-y-1">
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  href="/admin"
                   className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
+                    isDashboardActive
                       ? 'bg-futuris-teal/10 text-futuris-teal'
                       : 'text-text-muted hover:bg-gray-100 hover:text-text'
                   }`}
                 >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span>📊</span>
+                  <span>Dashboard</span>
                 </Link>
-              )
-            })}
+                <Link
+                  href="/admin/preview"
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    pathname === '/admin/preview'
+                      ? 'bg-futuris-teal/10 text-futuris-teal'
+                      : 'text-text-muted hover:bg-gray-100 hover:text-text'
+                  }`}
+                >
+                  <span>📱</span>
+                  <span>Preview</span>
+                </Link>
+              </div>
+            </div>
           </nav>
 
           <div className="p-4 border-t border-gray-200">
             <button
+              type="button"
               onClick={handleSignOut}
               className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-text-muted hover:bg-gray-100 hover:text-text rounded-lg transition-colors"
             >
@@ -73,6 +184,19 @@ export default function AdminLayout({
       </aside>
 
       <main className="ml-64 p-8">
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Pagina verversen"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Verversen
+          </button>
+        </div>
         {children}
       </main>
     </div>

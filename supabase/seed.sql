@@ -1,186 +1,405 @@
 -- ============================================================================
--- Futuris Bovenbouw Info-App - Seed Data
+-- Futuris Bovenbouw Info-App — Seed Data
 -- ============================================================================
--- This file contains example content for 4 tracks with related data.
--- Run this AFTER the migration has been applied.
+-- Schema: directions-based model met junction tables
+-- 6 richtingen: 4 D&P + 2 Mavo met huisstijl kleuren
+-- Run dit NA alle migraties zijn toegepast.
 -- ============================================================================
 
--- Clear existing data (optional, useful for re-seeding)
-TRUNCATE public.jobs, public.competencies, public.pathways, public.subjects, public.tracks CASCADE;
+-- Opruimen bestaande data (veilig voor re-seeding)
+TRUNCATE TABLE public.direction_education, public.direction_careers, public.direction_subjects,
+         public.direction_documents, public.direction_traits, public.direction_competencies,
+         public.further_education, public.careers, public.subjects, public.directions CASCADE;
 
 -- ============================================================================
--- TRACKS
+-- DIRECTIONS (6 richtingen)
 -- ============================================================================
-INSERT INTO public.tracks (id, slug, title, intro, what_you_learn, image_url, "order") VALUES
+INSERT INTO public.directions (id, slug, name, short_description, full_description, video_url, image_url, color, icon, "order", is_active, category, careers_intro) VALUES
+
+-- D&P Richtingen
 (
-    'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    'gezondheid-bewegen',
-    'Gezondheid & Bewegen',
-    'Ben jij geïnteresseerd in sport, gezondheid en het menselijk lichaam? In dit profiel leer je alles over beweging, voeding en welzijn. Je ontwikkelt vaardigheden om anderen te helpen gezonder te leven.',
-    'Je leert over anatomie, fysiologie, sportbegeleiding, voedingsleer en gezondheidspreventie. Ook ontwikkel je praktische vaardigheden in het begeleiden van sportactiviteiten en het geven van gezondheidsadvies.',
-    '/images/tracks/gezondheid-bewegen.jpg',
-    1
+  'a1b2c3d4-0001-4000-8000-000000000001',
+  'gezondheid-en-bewegen',
+  'Gezondheid & Bewegen',
+  'Sport, gezondheid en het menselijk lichaam',
+  'Ben jij geïnteresseerd in sport, gezondheid en het menselijk lichaam? In deze richting leer je alles over beweging, voeding en welzijn. Je ontwikkelt vaardigheden om anderen te helpen gezonder te leven. Van sportbegeleiding tot gezondheidsadvies — je ontdekt hoe je met je passie voor bewegen het verschil kunt maken.',
+  NULL,
+  NULL,
+  '#4B9D9E',
+  '💪',
+  1,
+  true,
+  'dp',
+  NULL
 ),
 (
-    'b2c3d4e5-f6a7-8901-bcde-f12345678901',
-    'kunst-cultuur',
-    'Kunst & Cultuur',
-    'Heb jij een creatieve geest en interesse in kunst, muziek, theater of design? Dit profiel biedt je de ruimte om je artistieke talenten te ontwikkelen en te ontdekken hoe cultuur onze wereld vormt.',
-    'Je leert verschillende kunstvormen kennen zoals beeldende kunst, muziek, theater en dans. Je ontwikkelt je eigen creatieve stem, leert presenteren en werkt samen aan culturele projecten.',
-    '/images/tracks/kunst-cultuur.jpg',
-    2
+  'a1b2c3d4-0002-4000-8000-000000000002',
+  'kunst-media',
+  'Kunst & Media',
+  'Creatief bezig zijn met kunst, design en media',
+  'Voor leerlingen met creatieve talenten en/of interesse in beeldende kunst, podiumkunst, media of vormgeving.',
+  NULL,
+  NULL,
+  '#C12179',
+  '🎨',
+  2,
+  true,
+  'dp',
+  'Je kunt kiezen voor een vervolgopleiding die te maken heeft met media, mode of (podium)kunst en opgeleid worden tot bijvoorbeeld ontwerper, vormgever of conceptontwikkelaar.'
 ),
 (
-    'c3d4e5f6-a7b8-9012-cdef-123456789012',
-    'tech',
-    'Tech',
-    'Fascineert technologie jou? Van programmeren tot robotica, van AI tot cybersecurity - in dit profiel duik je in de wereld van technologie en leer je de digitale toekomst mede te vormen.',
-    'Je leert programmeren in verschillende talen, werkt met hardware en software, ontdekt hoe netwerken werken en maakt kennis met moderne technologieën zoals AI, cloud computing en IoT.',
-    '/images/tracks/tech.jpg',
-    3
+  'a1b2c3d4-0003-4000-8000-000000000003',
+  'tech',
+  'Tech',
+  'Technologie, programmeren en digitale innovatie',
+  'Fascineert technologie jou? Van programmeren tot robotica, van AI tot cybersecurity — in deze richting duik je in de wereld van technologie. Je leert programmeren, werkt met hardware en software, en maakt kennis met moderne technologieën. Ontdek hoe jij de digitale toekomst mede kunt vormen.',
+  NULL,
+  NULL,
+  '#F3D835',
+  '💻',
+  3,
+  true,
+  'dp',
+  NULL
 ),
 (
-    'd4e5f6a7-b8c9-0123-defa-234567890123',
-    'horeca',
-    'Horeca',
-    'Hou je van koken, gastvrijheid en het creëren van bijzondere ervaringen? In dit profiel leer je alle aspecten van de horeca, van keuken tot bediening, van evenementen tot ondernemerschap.',
-    'Je leert kooktechnieken, gastheerschap, food & beverage management, evenementenorganisatie en de basis van horecaondernemerschap. Praktijkervaring staat centraal.',
-    '/images/tracks/horeca.jpg',
-    4
+  'a1b2c3d4-0004-4000-8000-000000000004',
+  'horeca',
+  'Horeca',
+  'Koken, gastvrijheid en evenementen',
+  'Hou je van koken, gastvrijheid en het creëren van bijzondere ervaringen? In deze richting leer je alle aspecten van de horeca. Van keuken tot bediening, van evenementen tot ondernemerschap. Je ontwikkelt praktische vaardigheden en leert wat het betekent om gasten een onvergetelijke ervaring te bieden.',
+  NULL,
+  NULL,
+  '#D26D6F',
+  '🍳',
+  4,
+  true,
+  'dp',
+  NULL
+),
+
+-- Mavo Routes
+(
+  'a1b2c3d4-0005-4000-8000-000000000005',
+  'mavo-mbo-route',
+  'Mavo MBO-route',
+  'De route voor leerlingen die na de mavo naar het MBO willen',
+  'De MBO-route bereidt je voor op een vervolgopleiding op het MBO. Je leert praktische vaardigheden en maakt kennis met verschillende beroepsrichtingen. Deze route is perfect als je na de mavo een praktijkgerichte opleiding wilt volgen.',
+  NULL,
+  NULL,
+  '#D2D1DB',
+  '🎯',
+  5,
+  true,
+  'mavo',
+  NULL
+),
+(
+  'a1b2c3d4-0006-4000-8000-000000000006',
+  'mavo-havo-route',
+  'Mavo HAVO-route',
+  'De route voor leerlingen die na de mavo naar de HAVO willen',
+  'De HAVO-route bereidt je voor op doorstroom naar de HAVO. Je werkt aan vakken op een hoger niveau en ontwikkelt studievaardigheden die je nodig hebt voor de HAVO. Deze route is ideaal als je na de mavo wilt doorleren op een hoger niveau.',
+  NULL,
+  NULL,
+  '#D2D1DB',
+  '📐',
+  6,
+  true,
+  'mavo',
+  NULL
 );
 
 -- ============================================================================
--- SUBJECTS - Gezondheid & Bewegen
+-- DIRECTION TRAITS (eigenschappen per richting)
 -- ============================================================================
-INSERT INTO public.subjects (track_id, title, type, "order") VALUES
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Biologie', 'required', 1),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Lichamelijke Opvoeding (LO2)', 'required', 2),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Verzorging', 'required', 3),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Wiskunde', 'required', 4),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Scheikunde', 'optional', 5),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Maatschappijleer', 'optional', 6);
 
--- SUBJECTS - Kunst & Cultuur
-INSERT INTO public.subjects (track_id, title, type, "order") VALUES
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Beeldende Vorming', 'required', 1),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Muziek', 'required', 2),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Drama', 'required', 3),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Nederlands', 'required', 4),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Geschiedenis', 'optional', 5),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'CKV', 'optional', 6);
+-- Gezondheid & Bewegen
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0001-4000-8000-000000000001', 'Je bent graag in beweging en houdt van sport', 1),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Je wilt leren hoe het menselijk lichaam werkt', 2),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Je vindt het leuk om anderen te helpen en te begeleiden', 3),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Je bent geïnteresseerd in gezondheid en voeding', 4),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Je houdt van samenwerken in teamverband', 5);
 
--- SUBJECTS - Tech
-INSERT INTO public.subjects (track_id, title, type, "order") VALUES
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Informatica', 'required', 1),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Wiskunde B', 'required', 2),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Natuurkunde', 'required', 3),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Engels', 'required', 4),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Scheikunde', 'optional', 5),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Economie', 'optional', 6);
+-- Kunst & Media
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0002-4000-8000-000000000002', 'Creatief bezig zijn met kunst en media', 1),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Ontwerpen, tekenen en vormgeven', 2),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Werken met foto en video', 3),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Optreden, presenteren en ontwerpen', 4),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Je ideeën laten zien aan anderen', 5);
 
--- SUBJECTS - Horeca
-INSERT INTO public.subjects (track_id, title, type, "order") VALUES
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Consumptief', 'required', 1),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Economie', 'required', 2),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Engels', 'required', 3),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Nederlands', 'required', 4),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Duits', 'optional', 5),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Wiskunde', 'optional', 6);
+-- Tech
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0003-4000-8000-000000000003', 'Je bent nieuwsgierig naar hoe technologie werkt', 1),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Je vindt puzzelen en problemen oplossen leuk', 2),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Je wilt leren programmeren of robots bouwen', 3),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Je bent goed in logisch en analytisch denken', 4),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Je wilt werken met computers en digitale tools', 5);
 
--- ============================================================================
--- PATHWAYS - Gezondheid & Bewegen
--- ============================================================================
-INSERT INTO public.pathways (track_id, title, url, "order") VALUES
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'MBO Sport en Bewegen', 'https://www.rocmondriaan.nl/opleidingen/sport-en-bewegen', 1),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'MBO Verpleegkunde', 'https://www.rocmondriaan.nl/opleidingen/verpleegkunde', 2),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'HBO Fysiotherapie', 'https://www.hhs.nl/opleidingen/fysiotherapie', 3),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'HBO Sportkunde', 'https://www.hhs.nl/opleidingen/sportkunde', 4);
+-- Horeca
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0004-4000-8000-000000000004', 'Je houdt van koken en lekker eten', 1),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Je bent gastvrij en vindt het leuk mensen te ontvangen', 2),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Je kunt goed samenwerken en bent stressbestendig', 3),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Je bent creatief met eten en presentatie', 4),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Je droomt van een eigen restaurant of bedrijf', 5);
 
--- PATHWAYS - Kunst & Cultuur
-INSERT INTO public.pathways (track_id, title, url, "order") VALUES
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'MBO Mediavormgever', 'https://www.grafisch-lyceum.nl/opleidingen/mediavormgever', 1),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Kunstacademie (HBO)', 'https://www.kabk.nl/', 2),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Conservatorium', 'https://www.koncon.nl/', 3),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Theaterschool', 'https://www.atd.ahk.nl/', 4);
+-- Mavo MBO-route
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0005-4000-8000-000000000005', 'Je wilt na de mavo een praktische opleiding volgen', 1),
+('a1b2c3d4-0005-4000-8000-000000000005', 'Je leert het liefst door te doen', 2),
+('a1b2c3d4-0005-4000-8000-000000000005', 'Je wilt snel aan het werk in een beroep', 3),
+('a1b2c3d4-0005-4000-8000-000000000005', 'Je bent benieuwd naar verschillende vakgebieden', 4);
 
--- PATHWAYS - Tech
-INSERT INTO public.pathways (track_id, title, url, "order") VALUES
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'MBO Software Developer', 'https://www.rocmondriaan.nl/opleidingen/software-developer', 1),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'HBO Informatica', 'https://www.hhs.nl/opleidingen/informatica', 2),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'HBO Technische Informatica', 'https://www.tudelft.nl/onderwijs/opleidingen/bachelors/ti', 3),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'WO Computer Science', 'https://www.tudelft.nl/onderwijs/opleidingen/bachelors/cs', 4);
-
--- PATHWAYS - Horeca
-INSERT INTO public.pathways (track_id, title, url, "order") VALUES
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'MBO Kok', 'https://www.rocmondriaan.nl/opleidingen/kok', 1),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'MBO Gastheer/Gastvrouw', 'https://www.rocmondriaan.nl/opleidingen/gastheer-gastvrouw', 2),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'MBO Horecaondernemer', 'https://www.rocmondriaan.nl/opleidingen/horecaondernemer', 3),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'HBO Hotelmanagement', 'https://www.hotelschool.nl/', 4);
+-- Mavo HAVO-route
+INSERT INTO public.direction_traits (direction_id, trait, "order") VALUES
+('a1b2c3d4-0006-4000-8000-000000000006', 'Je wilt na de mavo doorstromen naar de HAVO', 1),
+('a1b2c3d4-0006-4000-8000-000000000006', 'Je vindt leren leuk en wilt jezelf uitdagen', 2),
+('a1b2c3d4-0006-4000-8000-000000000006', 'Je bent gemotiveerd om op een hoger niveau te werken', 3),
+('a1b2c3d4-0006-4000-8000-000000000006', 'Je hebt goede studievaardigheden of wilt die ontwikkelen', 4);
 
 -- ============================================================================
--- COMPETENCIES - Gezondheid & Bewegen
+-- DIRECTION COMPETENCIES (competenties per richting)
 -- ============================================================================
-INSERT INTO public.competencies (track_id, title, description, "order") VALUES
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Sportbegeleiding', 'Je kunt sportactiviteiten organiseren en begeleiden voor verschillende doelgroepen.', 1),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Gezondheidsadvies', 'Je kunt advies geven over gezonde leefstijl, voeding en beweging.', 2),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'EHBO', 'Je beheerst basale eerste hulp en kunt adequaat handelen bij blessures.', 3),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Anatomische kennis', 'Je begrijpt hoe het menselijk lichaam werkt en hoe beweging hierop invloed heeft.', 4);
 
--- COMPETENCIES - Kunst & Cultuur
-INSERT INTO public.competencies (track_id, title, description, "order") VALUES
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Creatief denken', 'Je kunt originele ideeën ontwikkelen en deze vertalen naar kunstuitingen.', 1),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Presenteren', 'Je kunt je werk en ideeën overtuigend presenteren aan een publiek.', 2),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Samenwerken', 'Je kunt effectief samenwerken in creatieve projecten en producties.', 3),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Cultureel bewustzijn', 'Je hebt kennis van kunstgeschiedenis en culturele stromingen.', 4);
+-- Gezondheid & Bewegen
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0001-4000-8000-000000000001', 'Sportbegeleiding', 'Sportactiviteiten organiseren en begeleiden voor verschillende doelgroepen', '🏃', 1),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Gezondheidsadvies', 'Advies geven over gezonde leefstijl, voeding en beweging', '🥗', 2),
+('a1b2c3d4-0001-4000-8000-000000000001', 'EHBO & Veiligheid', 'Eerste hulp verlenen en veilig werken bij sportactiviteiten', '🩺', 3),
+('a1b2c3d4-0001-4000-8000-000000000001', 'Anatomische kennis', 'Begrijpen hoe het menselijk lichaam werkt en hoe beweging hierop invloed heeft', '🧬', 4);
 
--- COMPETENCIES - Tech
-INSERT INTO public.competencies (track_id, title, description, "order") VALUES
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Programmeren', 'Je kunt code schrijven in meerdere programmeertalen zoals Python, JavaScript en Java.', 1),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Probleemoplossend denken', 'Je kunt complexe technische problemen analyseren en oplossen.', 2),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Systeemdenken', 'Je begrijpt hoe verschillende technische componenten samenwerken.', 3),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Cybersecurity bewustzijn', 'Je begrijpt de basisprincipes van digitale veiligheid.', 4);
+-- Kunst & Media (4 verplichte D&P modules met richtingspecifieke voorbeelden)
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0002-4000-8000-000000000002', 'Organiseren van een activiteit', 'voorstelling, modeshow, dans-, acteer- en zangactiviteiten', '📋', 1),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Presenteren & promoten', 'moodboard, modetrends, fotoseries, portfolio', '🎤', 2),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Product maken', 'prentenboek, strip, up-/recycled kledingstuk', '✂️', 3),
+('a1b2c3d4-0002-4000-8000-000000000002', 'Multimediaal product maken', 'portfolio, digitale tentoonstelling, modevlog', '🖥️', 4);
 
--- COMPETENCIES - Horeca
-INSERT INTO public.competencies (track_id, title, description, "order") VALUES
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Gastvrijheid', 'Je kunt gasten ontvangen en een uitstekende service bieden.', 1),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Kooktechnieken', 'Je beheerst basis- en gevorderde kooktechnieken.', 2),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Stressbestendigheid', 'Je kunt goed functioneren onder druk en in een hectische omgeving.', 3),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Ondernemerschap', 'Je hebt inzicht in bedrijfsvoering en horecamanagement.', 4);
+-- Tech
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0003-4000-8000-000000000003', 'Programmeren', 'Code schrijven in meerdere programmeertalen', '💻', 1),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Probleemoplossend denken', 'Complexe technische problemen analyseren en oplossen', '🧩', 2),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Systeemdenken', 'Begrijpen hoe technische componenten samenwerken', '⚙️', 3),
+('a1b2c3d4-0003-4000-8000-000000000003', 'Cybersecurity bewustzijn', 'Basisprincipes van digitale veiligheid toepassen', '🔒', 4);
 
--- ============================================================================
--- JOBS - Gezondheid & Bewegen
--- ============================================================================
-INSERT INTO public.jobs (track_id, title, description, "order") VALUES
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Fysiotherapeut', 'Help patiënten herstellen van blessures en verbeter hun bewegingsvermogen.', 1),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Personal Trainer', 'Begeleid mensen naar hun fitnessdoelen met persoonlijke trainingsschema''s.', 2),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Sportleraar', 'Geef les in lichamelijke opvoeding en sport op scholen.', 3),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Verpleegkundige', 'Verzorg patiënten in ziekenhuizen, verpleeghuizen of thuiszorg.', 4),
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Diëtist', 'Adviseer mensen over gezonde voeding en behandel voedingsgerelateerde aandoeningen.', 5);
+-- Horeca
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0004-4000-8000-000000000004', 'Gastvrijheid', 'Gasten ontvangen en uitstekende service bieden', '🤝', 1),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Kooktechnieken', 'Basis- en gevorderde kooktechnieken beheersen', '👨‍🍳', 2),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Stressbestendigheid', 'Goed functioneren onder druk in een hectische omgeving', '⚡', 3),
+('a1b2c3d4-0004-4000-8000-000000000004', 'Ondernemerschap', 'Inzicht in bedrijfsvoering en horecamanagement', '📊', 4);
 
--- JOBS - Kunst & Cultuur
-INSERT INTO public.jobs (track_id, title, description, "order") VALUES
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Grafisch Ontwerper', 'Ontwerp visuele concepten voor merken, websites en gedrukte media.', 1),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Muzikant', 'Maak en voer muziek uit als soloartiest of in een band.', 2),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Acteur', 'Vertolk rollen in theater, film, televisie of reclame.', 3),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Curator', 'Stel tentoonstellingen samen en beheer kunstcollecties.', 4),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Docent Kunst', 'Geef kunstlessen op scholen of in culturele instellingen.', 5);
+-- Mavo MBO-route
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0005-4000-8000-000000000005', 'Praktische vaardigheden', 'Hands-on leren en werken in verschillende vakgebieden', '🔧', 1),
+('a1b2c3d4-0005-4000-8000-000000000005', 'Beroepsoriëntatie', 'Verschillende beroepen en sectoren verkennen', '🔍', 2),
+('a1b2c3d4-0005-4000-8000-000000000005', 'Zelfstandigheid', 'Zelfstandig werken en verantwoordelijkheid nemen', '🎯', 3);
 
--- JOBS - Tech
-INSERT INTO public.jobs (track_id, title, description, "order") VALUES
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Software Developer', 'Ontwikkel applicaties en systemen voor web, mobile of desktop.', 1),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Data Scientist', 'Analyseer grote datasets en ontwikkel AI/ML modellen.', 2),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Cybersecurity Specialist', 'Bescherm systemen en netwerken tegen digitale dreigingen.', 3),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'DevOps Engineer', 'Beheer cloud infrastructuur en automatiseer deployment processen.', 4),
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 'UX Designer', 'Ontwerp gebruiksvriendelijke digitale producten en interfaces.', 5);
-
--- JOBS - Horeca
-INSERT INTO public.jobs (track_id, title, description, "order") VALUES
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Chef-kok', 'Leid een keuken en creëer culinaire gerechten.', 1),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Restaurant Manager', 'Beheer de dagelijkse operatie van een restaurant.', 2),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Barista', 'Bereid koffie en andere dranken in een café of koffiebar.', 3),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Hotelmanager', 'Leid de operatie van een hotel en zorg voor gasttevredenheid.', 4),
-('d4e5f6a7-b8c9-0123-defa-234567890123', 'Event Planner', 'Organiseer evenementen zoals bruiloften, conferenties en feesten.', 5);
+-- Mavo HAVO-route
+INSERT INTO public.direction_competencies (direction_id, title, description, icon, "order") VALUES
+('a1b2c3d4-0006-4000-8000-000000000006', 'Studievaardigheden', 'Effectief studeren, plannen en organiseren', '📚', 1),
+('a1b2c3d4-0006-4000-8000-000000000006', 'Analytisch denken', 'Complexe informatie begrijpen en verwerken', '🧠', 2),
+('a1b2c3d4-0006-4000-8000-000000000006', 'Academisch schrijven', 'Duidelijk en gestructureerd schrijven op hoger niveau', '✍️', 3);
 
 -- ============================================================================
--- END OF SEED DATA
+-- SUBJECTS (vakken — standalone tabel)
+-- ============================================================================
+INSERT INTO public.subjects (id, name, description, icon, "order") VALUES
+('b1000000-0001-4000-8000-000000000001', 'Biologie', 'Het menselijk lichaam, natuur en gezondheid', '🧬', 1),
+('b1000000-0002-4000-8000-000000000002', 'Lichamelijke Opvoeding (LO2)', 'Verdieping in sport en bewegingsonderwijs', '🏃', 2),
+('b1000000-0003-4000-8000-000000000003', 'Verzorging', 'Gezondheid, welzijn en zorg', '🩺', 3),
+('b1000000-0004-4000-8000-000000000004', 'Wiskunde', 'Rekenen, logica en wiskundig denken', '📐', 4),
+('b1000000-0005-4000-8000-000000000005', 'Scheikunde', 'Stoffen, reacties en materialen', '⚗️', 5),
+('b1000000-0006-4000-8000-000000000006', 'Maatschappijleer', 'Samenleving, politiek en burgerschap', '🏛️', 6),
+('b1000000-0007-4000-8000-000000000007', 'Beeldende Vorming', 'Tekenen, schilderen en beeldhouwen', '🎨', 7),
+('b1000000-0008-4000-8000-000000000008', 'Muziek', 'Muziektheorie en muziek maken', '🎵', 8),
+('b1000000-0009-4000-8000-000000000009', 'Drama', 'Theater, presenteren en performance', '🎭', 9),
+('b1000000-0010-4000-8000-000000000010', 'Nederlands', 'Taalvaardigheid, literatuur en communicatie', '📝', 10),
+('b1000000-0011-4000-8000-000000000011', 'Geschiedenis', 'Historisch bewustzijn en oriëntatie', '📜', 11),
+('b1000000-0012-4000-8000-000000000012', 'CKV', 'Culturele en kunstzinnige vorming', '🎪', 12),
+('b1000000-0013-4000-8000-000000000013', 'Informatica', 'Programmeren, netwerken en digitale systemen', '💻', 13),
+('b1000000-0014-4000-8000-000000000014', 'Wiskunde B', 'Wiskundig denken op hoog niveau', '🔢', 14),
+('b1000000-0015-4000-8000-000000000015', 'Natuurkunde', 'Fysica, energie en mechanica', '⚡', 15),
+('b1000000-0016-4000-8000-000000000016', 'Engels', 'Engelse taalvaardigheid en literatuur', '🇬🇧', 16),
+('b1000000-0017-4000-8000-000000000017', 'Economie', 'Economisch denken, ondernemen en financiën', '📊', 17),
+('b1000000-0018-4000-8000-000000000018', 'Consumptief', 'Voeding, koken en horecatechniek', '🍳', 18),
+('b1000000-0019-4000-8000-000000000019', 'Duits', 'Duitse taalvaardigheid en cultuur', '🇩🇪', 19),
+('b1000000-0020-4000-8000-000000000020', 'Frans', 'Franse taalvaardigheid en cultuur', '🇫🇷', 20),
+-- Nieuwe vakken voor D&P Kunst & Media
+('b1000000-0021-4000-8000-000000000021', 'Tekenen, schilderen en illustreren', 'Beeldende technieken en visuele expressie', '🖌️', 21),
+('b1000000-0022-4000-8000-000000000022', 'Fotografie', 'Fotografische technieken en beeldvorming', '📷', 22),
+('b1000000-0023-4000-8000-000000000023', 'Dans-, acteer- en zangactiviteiten', 'Podiumkunsten en performance', '💃', 23),
+('b1000000-0024-4000-8000-000000000024', 'Modetechniek', 'Mode-ontwerp, patronen en kledingconstructie', '✂️', 24);
+
+-- ============================================================================
+-- DIRECTION_SUBJECTS (koppeling richtingen <-> vakken)
+-- ============================================================================
+
+-- Gezondheid & Bewegen
+INSERT INTO public.direction_subjects (direction_id, subject_id, type, hours_per_week, "order") VALUES
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0001-4000-8000-000000000001', 'required', 3, 1),  -- Biologie
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0002-4000-8000-000000000002', 'required', 4, 2),  -- LO2
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0003-4000-8000-000000000003', 'required', 2, 3),  -- Verzorging
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0004-4000-8000-000000000004', 'required', 3, 4),  -- Wiskunde
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0005-4000-8000-000000000005', 'optional', 2, 5),  -- Scheikunde
+('a1b2c3d4-0001-4000-8000-000000000001', 'b1000000-0006-4000-8000-000000000006', 'optional', 2, 6);  -- Maatschappijleer
+
+-- Kunst & Media (volgens contentdocument)
+INSERT INTO public.direction_subjects (direction_id, subject_id, type, hours_per_week, "order") VALUES
+('a1b2c3d4-0002-4000-8000-000000000002', 'b1000000-0021-4000-8000-000000000021', 'required', 0, 1),  -- Tekenen, schilderen en illustreren
+('a1b2c3d4-0002-4000-8000-000000000002', 'b1000000-0022-4000-8000-000000000022', 'required', 0, 2),  -- Fotografie
+('a1b2c3d4-0002-4000-8000-000000000002', 'b1000000-0023-4000-8000-000000000023', 'optional', 0, 3),  -- Dans-, acteer- en zangactiviteiten
+('a1b2c3d4-0002-4000-8000-000000000002', 'b1000000-0024-4000-8000-000000000024', 'optional', 0, 4);  -- Modetechniek
+
+-- Tech
+INSERT INTO public.direction_subjects (direction_id, subject_id, type, hours_per_week, "order") VALUES
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0013-4000-8000-000000000013', 'required', 4, 1),  -- Informatica
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0014-4000-8000-000000000014', 'required', 3, 2),  -- Wiskunde B
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0015-4000-8000-000000000015', 'required', 3, 3),  -- Natuurkunde
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0016-4000-8000-000000000016', 'required', 3, 4),  -- Engels
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0005-4000-8000-000000000005', 'optional', 2, 5),  -- Scheikunde
+('a1b2c3d4-0003-4000-8000-000000000003', 'b1000000-0017-4000-8000-000000000017', 'optional', 2, 6);  -- Economie
+
+-- Horeca
+INSERT INTO public.direction_subjects (direction_id, subject_id, type, hours_per_week, "order") VALUES
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0018-4000-8000-000000000018', 'required', 4, 1),  -- Consumptief
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0017-4000-8000-000000000017', 'required', 3, 2),  -- Economie
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0016-4000-8000-000000000016', 'required', 3, 3),  -- Engels
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0010-4000-8000-000000000010', 'required', 3, 4),  -- Nederlands
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0019-4000-8000-000000000019', 'optional', 2, 5),  -- Duits
+('a1b2c3d4-0004-4000-8000-000000000004', 'b1000000-0004-4000-8000-000000000004', 'optional', 2, 6);  -- Wiskunde
+
+-- ============================================================================
+-- CAREERS (beroepen — standalone tabel)
+-- ============================================================================
+INSERT INTO public.careers (id, name, description, icon, "order") VALUES
+-- Gezondheid & Bewegen
+('c1000000-0001-4000-8000-000000000001', 'Fysiotherapeut', 'Help patiënten herstellen van blessures en verbeter hun bewegingsvermogen', '🏥', 1),
+('c1000000-0002-4000-8000-000000000002', 'Personal Trainer', 'Begeleid mensen naar hun fitnessdoelen met persoonlijke trainingsplannen', '💪', 2),
+('c1000000-0003-4000-8000-000000000003', 'Sportleraar', 'Geef les in lichamelijke opvoeding en sport op scholen', '🏫', 3),
+('c1000000-0004-4000-8000-000000000004', 'Verpleegkundige', 'Verzorg patiënten in ziekenhuizen, verpleeghuizen of thuiszorg', '🩺', 4),
+('c1000000-0005-4000-8000-000000000005', 'Diëtist', 'Adviseer mensen over gezonde voeding en voedingsgerelateerde aandoeningen', '🥗', 5),
+-- Kunst & Media (uit contentdocument)
+('c1000000-0006-4000-8000-000000000006', 'Modefotograaf', 'Fotografeer modecollecties, campagnes en fashion shoots', '📸', 6),
+('c1000000-0007-4000-8000-000000000007', 'Set stylist', 'Style sets en locaties voor fotografie, film en events', '🎨', 7),
+('c1000000-0008-4000-8000-000000000008', 'Digitale game artist', 'Ontwerp visuals, personages en werelden voor games', '🎮', 8),
+('c1000000-0009-4000-8000-000000000009', 'Ontwerper', 'Ontwerp producten, mode of visuele concepten', '✏️', 9),
+('c1000000-0010-4000-8000-000000000010', 'Vormgever', 'Geef vorm aan grafische en visuele communicatie', '🖌️', 10),
+('c1000000-0021-4000-8000-000000000021', 'Conceptontwikkelaar', 'Ontwikkel creatieve concepten voor merken en media', '💡', 21),
+-- Tech
+('c1000000-0011-4000-8000-000000000011', 'Software Developer', 'Ontwikkel applicaties en systemen voor web, mobile of desktop', '💻', 11),
+('c1000000-0012-4000-8000-000000000012', 'Data Scientist', 'Analyseer grote datasets en ontwikkel AI/ML modellen', '📊', 12),
+('c1000000-0013-4000-8000-000000000013', 'Cybersecurity Specialist', 'Bescherm systemen en netwerken tegen digitale dreigingen', '🔒', 13),
+('c1000000-0014-4000-8000-000000000014', 'DevOps Engineer', 'Beheer cloud infrastructuur en automatiseer deployment processen', '☁️', 14),
+('c1000000-0015-4000-8000-000000000015', 'UX Designer', 'Ontwerp gebruiksvriendelijke digitale producten en interfaces', '🖌️', 15),
+-- Horeca
+('c1000000-0016-4000-8000-000000000016', 'Chef-kok', 'Leid een keuken en creëer culinaire gerechten', '👨‍🍳', 16),
+('c1000000-0017-4000-8000-000000000017', 'Restaurant Manager', 'Beheer de dagelijkse operatie van een restaurant', '🍽️', 17),
+('c1000000-0018-4000-8000-000000000018', 'Barista', 'Bereid koffie en dranken in een café of koffiebar', '☕', 18),
+('c1000000-0019-4000-8000-000000000019', 'Hotelmanager', 'Leid de operatie van een hotel en zorg voor gasttevredenheid', '🏨', 19),
+('c1000000-0020-4000-8000-000000000020', 'Event Planner', 'Organiseer evenementen zoals bruiloften, conferenties en feesten', '🎉', 20);
+
+-- ============================================================================
+-- DIRECTION_CAREERS (koppeling richtingen <-> beroepen)
+-- ============================================================================
+
+-- Gezondheid & Bewegen
+INSERT INTO public.direction_careers (direction_id, career_id, "order") VALUES
+('a1b2c3d4-0001-4000-8000-000000000001', 'c1000000-0001-4000-8000-000000000001', 1),  -- Fysiotherapeut
+('a1b2c3d4-0001-4000-8000-000000000001', 'c1000000-0002-4000-8000-000000000002', 2),  -- Personal Trainer
+('a1b2c3d4-0001-4000-8000-000000000001', 'c1000000-0003-4000-8000-000000000003', 3),  -- Sportleraar
+('a1b2c3d4-0001-4000-8000-000000000001', 'c1000000-0004-4000-8000-000000000004', 4),  -- Verpleegkundige
+('a1b2c3d4-0001-4000-8000-000000000001', 'c1000000-0005-4000-8000-000000000005', 5);  -- Diëtist
+
+-- Kunst & Media (uit contentdocument)
+INSERT INTO public.direction_careers (direction_id, career_id, "order") VALUES
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0006-4000-8000-000000000006', 1),  -- Modefotograaf
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0007-4000-8000-000000000007', 2),  -- Set stylist
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0008-4000-8000-000000000008', 3),  -- Digitale game artist
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0009-4000-8000-000000000009', 4),  -- Ontwerper
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0010-4000-8000-000000000010', 5),  -- Vormgever
+('a1b2c3d4-0002-4000-8000-000000000002', 'c1000000-0021-4000-8000-000000000021', 6);  -- Conceptontwikkelaar
+
+-- Tech
+INSERT INTO public.direction_careers (direction_id, career_id, "order") VALUES
+('a1b2c3d4-0003-4000-8000-000000000003', 'c1000000-0011-4000-8000-000000000011', 1),  -- Software Developer
+('a1b2c3d4-0003-4000-8000-000000000003', 'c1000000-0012-4000-8000-000000000012', 2),  -- Data Scientist
+('a1b2c3d4-0003-4000-8000-000000000003', 'c1000000-0013-4000-8000-000000000013', 3),  -- Cybersecurity Specialist
+('a1b2c3d4-0003-4000-8000-000000000003', 'c1000000-0014-4000-8000-000000000014', 4),  -- DevOps Engineer
+('a1b2c3d4-0003-4000-8000-000000000003', 'c1000000-0015-4000-8000-000000000015', 5);  -- UX Designer
+
+-- Horeca
+INSERT INTO public.direction_careers (direction_id, career_id, "order") VALUES
+('a1b2c3d4-0004-4000-8000-000000000004', 'c1000000-0016-4000-8000-000000000016', 1),  -- Chef-kok
+('a1b2c3d4-0004-4000-8000-000000000004', 'c1000000-0017-4000-8000-000000000017', 2),  -- Restaurant Manager
+('a1b2c3d4-0004-4000-8000-000000000004', 'c1000000-0018-4000-8000-000000000018', 3),  -- Barista
+('a1b2c3d4-0004-4000-8000-000000000004', 'c1000000-0019-4000-8000-000000000019', 4),  -- Hotelmanager
+('a1b2c3d4-0004-4000-8000-000000000004', 'c1000000-0020-4000-8000-000000000020', 5);  -- Event Planner
+
+-- ============================================================================
+-- FURTHER_EDUCATION (vervolgopleidingen — standalone tabel)
+-- ============================================================================
+INSERT INTO public.further_education (id, name, type, description, institution, url, "order") VALUES
+-- Gezondheid & Bewegen
+('d1000000-0001-4000-8000-000000000001', 'Sport en Bewegen', 'mbo', 'MBO-opleiding gericht op sport, bewegen en een gezonde leefstijl', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 1),
+('d1000000-0002-4000-8000-000000000002', 'Verpleegkunde', 'mbo', 'MBO-opleiding tot verpleegkundige', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 2),
+('d1000000-0003-4000-8000-000000000003', 'Fysiotherapie', 'hbo', 'HBO-opleiding tot fysiotherapeut', 'De Haagse Hogeschool', 'https://www.hhs.nl', 3),
+('d1000000-0004-4000-8000-000000000004', 'Sportkunde', 'hbo', 'HBO-opleiding gericht op sportmanagement en coaching', 'De Haagse Hogeschool', 'https://www.hhs.nl', 4),
+-- Kunst & Media
+('d1000000-0005-4000-8000-000000000005', 'Mediavormgever', 'mbo', 'MBO-opleiding in grafisch ontwerp en digitale media', 'Grafisch Lyceum Rotterdam', 'https://www.glr.nl', 5),
+('d1000000-0006-4000-8000-000000000006', 'Filmacademie', 'hbo', 'HBO-opleiding in film, video en animatie', 'Filmacademie Amsterdam', 'https://www.filmacademie.ahk.nl', 6),
+('d1000000-0007-4000-8000-000000000007', 'Kunstacademie', 'hbo', 'HBO-opleiding in beeldende kunst en vormgeving', 'KABK', 'https://www.kabk.nl', 7),
+('d1000000-0008-4000-8000-000000000008', 'Communication & Multimedia Design', 'hbo', 'HBO-opleiding in digitaal design en interactieve media', 'De Haagse Hogeschool', 'https://www.hhs.nl', 8),
+-- Tech
+('d1000000-0009-4000-8000-000000000009', 'Software Developer', 'mbo', 'MBO-opleiding tot software developer', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 9),
+('d1000000-0010-4000-8000-000000000010', 'Informatica', 'hbo', 'HBO-opleiding in software engineering en informatica', 'De Haagse Hogeschool', 'https://www.hhs.nl', 10),
+('d1000000-0011-4000-8000-000000000011', 'Technische Informatica', 'hbo', 'HBO-opleiding gericht op embedded systems en netwerken', 'De Haagse Hogeschool', 'https://www.hhs.nl', 11),
+('d1000000-0012-4000-8000-000000000012', 'Computer Science', 'wo', 'Universitaire opleiding in informatica en computerwetenschappen', 'TU Delft', 'https://www.tudelft.nl', 12),
+-- Horeca
+('d1000000-0013-4000-8000-000000000013', 'Kok', 'mbo', 'MBO-opleiding tot kok', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 13),
+('d1000000-0014-4000-8000-000000000014', 'Gastheer/Gastvrouw', 'mbo', 'MBO-opleiding in horecabediening en gastvrijheid', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 14),
+('d1000000-0015-4000-8000-000000000015', 'Horecaondernemer', 'mbo', 'MBO-opleiding tot horecaondernemer/manager', 'ROC Mondriaan', 'https://www.rocmondriaan.nl', 15),
+('d1000000-0016-4000-8000-000000000016', 'Hotel Management', 'hbo', 'HBO-opleiding in hotelmanagement', 'Hotelschool The Hague', 'https://www.hotelschool.nl', 16);
+
+-- ============================================================================
+-- DIRECTION_EDUCATION (koppeling richtingen <-> opleidingen)
+-- ============================================================================
+
+-- Gezondheid & Bewegen
+INSERT INTO public.direction_education (direction_id, education_id, "order") VALUES
+('a1b2c3d4-0001-4000-8000-000000000001', 'd1000000-0001-4000-8000-000000000001', 1),  -- Sport en Bewegen (MBO)
+('a1b2c3d4-0001-4000-8000-000000000001', 'd1000000-0002-4000-8000-000000000002', 2),  -- Verpleegkunde (MBO)
+('a1b2c3d4-0001-4000-8000-000000000001', 'd1000000-0003-4000-8000-000000000003', 3),  -- Fysiotherapie (HBO)
+('a1b2c3d4-0001-4000-8000-000000000001', 'd1000000-0004-4000-8000-000000000004', 4);  -- Sportkunde (HBO)
+
+-- Kunst & Media
+INSERT INTO public.direction_education (direction_id, education_id, "order") VALUES
+('a1b2c3d4-0002-4000-8000-000000000002', 'd1000000-0005-4000-8000-000000000005', 1),  -- Mediavormgever (MBO)
+('a1b2c3d4-0002-4000-8000-000000000002', 'd1000000-0006-4000-8000-000000000006', 2),  -- Filmacademie (HBO)
+('a1b2c3d4-0002-4000-8000-000000000002', 'd1000000-0007-4000-8000-000000000007', 3),  -- Kunstacademie (HBO)
+('a1b2c3d4-0002-4000-8000-000000000002', 'd1000000-0008-4000-8000-000000000008', 4);  -- CMD (HBO)
+
+-- Tech
+INSERT INTO public.direction_education (direction_id, education_id, "order") VALUES
+('a1b2c3d4-0003-4000-8000-000000000003', 'd1000000-0009-4000-8000-000000000009', 1),  -- Software Developer (MBO)
+('a1b2c3d4-0003-4000-8000-000000000003', 'd1000000-0010-4000-8000-000000000010', 2),  -- Informatica (HBO)
+('a1b2c3d4-0003-4000-8000-000000000003', 'd1000000-0011-4000-8000-000000000011', 3),  -- Technische Informatica (HBO)
+('a1b2c3d4-0003-4000-8000-000000000003', 'd1000000-0012-4000-8000-000000000012', 4);  -- Computer Science (WO)
+
+-- Horeca
+INSERT INTO public.direction_education (direction_id, education_id, "order") VALUES
+('a1b2c3d4-0004-4000-8000-000000000004', 'd1000000-0013-4000-8000-000000000013', 1),  -- Kok (MBO)
+('a1b2c3d4-0004-4000-8000-000000000004', 'd1000000-0014-4000-8000-000000000014', 2),  -- Gastheer/Gastvrouw (MBO)
+('a1b2c3d4-0004-4000-8000-000000000004', 'd1000000-0015-4000-8000-000000000015', 3),  -- Horecaondernemer (MBO)
+('a1b2c3d4-0004-4000-8000-000000000004', 'd1000000-0016-4000-8000-000000000016', 4);  -- Hotel Management (HBO)
+
+-- ============================================================================
+-- EINDE SEED DATA
+-- ============================================================================
+-- Totaal: 6 richtingen, 29 traits, 25 competenties, 20 vakken,
+--         24 vak-koppelingen, 20 beroepen, 20 beroep-koppelingen,
+--         16 opleidingen, 16 opleiding-koppelingen
 -- ============================================================================
