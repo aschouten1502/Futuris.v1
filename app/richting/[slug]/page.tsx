@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getDirectionWithDetails, getDirections } from '@/lib/data'
 import PublicLayout from '@/components/PublicLayout'
+import { SubjectChip } from '@/components/SubjectChip'
 import type { Metadata } from 'next'
 
 // Convert various YouTube URL formats to embed URL
@@ -158,7 +159,7 @@ export default async function DirectionPage({ params }: PageProps) {
                     <h3 className="font-medium text-text mb-2">{mod.icon} {mod.title}</h3>
                     {mod.description && (
                       <ul className="space-y-1 ml-1">
-                        {mod.description.split(',').map((item, i) => (
+                        {mod.description.split(/[,;]/).map((item, i) => (
                           <li key={i} className="text-sm text-text-muted flex items-start gap-2">
                             <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: direction.color }} />
                             {item.trim()}
@@ -168,6 +169,38 @@ export default async function DirectionPage({ params }: PageProps) {
                     )}
                   </div>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {/* Past dit bij jou? (Traits) */}
+          {direction.traits.length > 0 && (
+            <section className="mb-8">
+              <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
+                <span
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${direction.color}15` }}
+                >
+                  <span className="text-lg">🎯</span>
+                </span>
+                Past dit bij jou?
+              </h2>
+              <div className="bg-white rounded-xl border border-surface-lavender/40 p-4">
+                <p className="text-text-muted mb-3">Deze richting past bij jou als je:</p>
+                <div className="flex flex-wrap gap-2">
+                  {direction.traits.map((trait) => (
+                    <span
+                      key={trait.id}
+                      className="px-3 py-1.5 rounded-full text-sm font-medium text-text border"
+                      style={{
+                        backgroundColor: `${direction.color}12`,
+                        borderColor: `${direction.color}40`,
+                      }}
+                    >
+                      {trait.trait}
+                    </span>
+                  ))}
+                </div>
               </div>
             </section>
           )}
@@ -217,7 +250,7 @@ export default async function DirectionPage({ params }: PageProps) {
             </section>
           )}
 
-          {/* Algemene verplichte vakken */}
+          {/* Algemene verplichte vakken - compact chips */}
           {direction.subjects.generalRequired.length > 0 && (
             <section className="mb-8">
               <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
@@ -229,18 +262,15 @@ export default async function DirectionPage({ params }: PageProps) {
                 </span>
                 Algemene verplichte vakken
               </h2>
-              <div className="bg-white rounded-xl border border-surface-lavender/40 divide-y divide-surface-lavender/20">
+              <div className="flex flex-wrap gap-2">
                 {direction.subjects.generalRequired.map((ds) => (
-                  <div key={ds.id} className="p-4 flex items-center gap-3">
-                    <span className="text-lg">{ds.subject.icon || '📖'}</span>
-                    <span className="font-medium text-text">{ds.subject.name}</span>
-                  </div>
+                  <SubjectChip key={ds.id} subject={ds.subject} color={direction.color} />
                 ))}
               </div>
             </section>
           )}
 
-          {/* Algemene keuzevakken */}
+          {/* Algemene keuzevakken - compact chips */}
           {direction.subjects.generalOptional.length > 0 && (
             <section className="mb-8">
               <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
@@ -252,12 +282,9 @@ export default async function DirectionPage({ params }: PageProps) {
                 </span>
                 Algemene keuzevakken
               </h2>
-              <div className="bg-white/60 rounded-xl border border-gray-200 divide-y divide-gray-100">
+              <div className="flex flex-wrap gap-2">
                 {direction.subjects.generalOptional.map((ds) => (
-                  <div key={ds.id} className="p-3 flex items-center gap-3">
-                    <span className="text-lg opacity-60">{ds.subject.icon || '📖'}</span>
-                    <span className="text-text-muted">{ds.subject.name}</span>
-                  </div>
+                  <SubjectChip key={ds.id} subject={ds.subject} color={direction.color} />
                 ))}
               </div>
             </section>

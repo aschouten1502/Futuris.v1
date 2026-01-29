@@ -18,15 +18,18 @@ export default function PreviewPage() {
   const [activeDevice, setActiveDevice] = useState(1)
   const [activePath, setActivePath] = useState('/')
   const [directionSlug, setDirectionSlug] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [cacheKey, setCacheKey] = useState(() => Date.now())
 
   const device = devices[activeDevice]
   const frameWidth = device.width * device.scale
   const frameHeight = device.height * device.scale
 
-  const previewUrl = activePath === 'richting'
+  const basePath = activePath === 'richting'
     ? `/richting/${directionSlug || 'test'}`
     : activePath
+
+  // Add cache-busting timestamp to bypass Next.js ISR cache
+  const previewUrl = `${basePath}?_t=${cacheKey}`
 
   return (
     <div>
@@ -40,7 +43,7 @@ export default function PreviewPage() {
         </div>
         <button
           type="button"
-          onClick={() => setRefreshKey(k => k + 1)}
+          onClick={() => setCacheKey(Date.now())}
           className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +148,7 @@ export default function PreviewPage() {
               }}
             >
               <iframe
-                key={`${device.name}-${previewUrl}-${refreshKey}`}
+                key={`${device.name}-${previewUrl}-${cacheKey}`}
                 src={previewUrl}
                 title={`Preview op ${device.name}`}
                 style={{
