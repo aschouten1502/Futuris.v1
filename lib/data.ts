@@ -425,3 +425,84 @@ export async function getEducationByDirection(directionId: string): Promise<(Dir
 
   return (data || []) as (DirectionEducation & { education: FurtherEducation })[]
 }
+
+// ============================================
+// SITE SETTINGS
+// ============================================
+
+export interface SiteSetting {
+  id: string
+  key: string
+  value: string | null
+  description: string | null
+  updated_at: string
+}
+
+export interface CategorySettings {
+  dp: {
+    title: string
+    subtitle: string
+    description: string
+    image: string | null
+    icon: string
+  }
+  mavo: {
+    title: string
+    subtitle: string
+    description: string
+    image: string | null
+    icon: string
+  }
+}
+
+export async function getSiteSettings(): Promise<SiteSetting[]> {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('*')
+    .order('key', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching site settings:', error)
+    throw new Error('Kon instellingen niet laden')
+  }
+
+  return data || []
+}
+
+export async function getCategorySettings(): Promise<CategorySettings> {
+  const settings = await getSiteSettings()
+
+  const getValue = (key: string, fallback: string = '') => {
+    const setting = settings.find(s => s.key === key)
+    return setting?.value || fallback
+  }
+
+  return {
+    dp: {
+      title: getValue('dp_category_title', 'D&P'),
+      subtitle: getValue('dp_category_subtitle', 'Dienstverlening & Producten'),
+      description: getValue('dp_category_description', 'Praktijkgerichte richtingen met stage en beroepsvoorbereiding'),
+      image: getValue('dp_category_image') || null,
+      icon: getValue('dp_category_icon', '🎯'),
+    },
+    mavo: {
+      title: getValue('mavo_category_title', 'Mavo'),
+      subtitle: getValue('mavo_category_subtitle', 'Theoretische leerweg'),
+      description: getValue('mavo_category_description', 'Routes richting MBO of doorstroom naar HAVO'),
+      image: getValue('mavo_category_image') || null,
+      icon: getValue('mavo_category_icon', '📚'),
+    },
+  }
+}
+
+export async function updateSiteSetting(key: string, value: string | null): Promise<void> {
+  const { error } = await supabase
+    .from('site_settings')
+    .update({ value, updated_at: new Date().toISOString() })
+    .eq('key', key)
+
+  if (error) {
+    console.error('Error updating site setting:', error)
+    throw new Error('Kon instelling niet opslaan')
+  }
+}

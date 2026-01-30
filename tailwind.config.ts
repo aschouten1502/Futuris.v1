@@ -74,6 +74,15 @@ const config: Config = {
         'card-hover': '0 8px 24px rgba(0, 60, 70, 0.12)',
         elevated: '0 12px 40px rgba(0, 60, 70, 0.15)',
       },
+      animation: {
+        fadeIn: 'fadeIn 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [],

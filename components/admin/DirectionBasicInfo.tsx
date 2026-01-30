@@ -51,26 +51,15 @@ export function DirectionBasicInfo({ direction, onChange }: DirectionBasicInfoPr
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (YouTube)</label>
-            <input
-              type="text"
-              value={direction.video_url || ''}
-              onChange={e => onChange({ video_url: e.target.value })}
-              placeholder="https://www.youtube.com/watch?v=..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Afbeelding URL</label>
-            <input
-              type="text"
-              value={direction.image_url || ''}
-              onChange={e => onChange({ image_url: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (YouTube)</label>
+          <input
+            type="text"
+            value={direction.video_url || ''}
+            onChange={e => onChange({ video_url: e.target.value })}
+            placeholder="https://youtu.be/... of https://www.youtube.com/watch?v=..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

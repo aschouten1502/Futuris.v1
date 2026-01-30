@@ -184,6 +184,17 @@ export default function AdminLayout({
                   <span>Dashboard</span>
                 </Link>
                 <Link
+                  href="/admin/settings"
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    pathname === '/admin/settings'
+                      ? 'bg-futuris-teal/10 text-futuris-teal'
+                      : 'text-text-muted hover:bg-gray-100 hover:text-text'
+                  }`}
+                >
+                  <span>⚙️</span>
+                  <span>Homepage</span>
+                </Link>
+                <Link
                   href="/admin/preview"
                   className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     pathname === '/admin/preview'
