@@ -2,13 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Allow images from Supabase Storage
+  // Allow images from any HTTPS source (needed for user-uploaded external URLs)
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        hostname: '**',
       },
     ],
   },

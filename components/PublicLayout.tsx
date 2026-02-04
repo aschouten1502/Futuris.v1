@@ -68,15 +68,7 @@ export default function PublicLayout({
               />
             </Link>
 
-            {/* Navigation */}
-            <nav className="flex items-center gap-4">
-              <Link
-                href="/ouders"
-                className="text-sm text-text-muted hover:text-futuris-teal transition-colors"
-              >
-                Voor ouders
-              </Link>
-            </nav>
+{/* Navigation removed - ouders link verwijderd */}
           </div>
         </div>
       </header>
@@ -104,9 +96,6 @@ export default function PublicLayout({
             </p>
             {/* Links */}
             <div className="flex gap-6 text-sm text-white/80">
-              <Link href="/ouders" className="hover:text-white transition-colors">
-                Voor ouders
-              </Link>
               <a
                 href="https://futuris.nl"
                 target="_blank"

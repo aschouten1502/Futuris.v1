@@ -4,9 +4,12 @@ import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
+type ImageOrientation = 'landscape' | 'portrait' | 'square'
+
 interface ImageUploadProps {
   value: string | null
   onChange: (url: string | null) => void
+  onOrientationDetect?: (orientation: ImageOrientation) => void
   folder?: string
   aspectRatio?: 'square' | 'landscape' | 'portrait'
 }
@@ -14,6 +17,7 @@ interface ImageUploadProps {
 export function ImageUpload({
   value,
   onChange,
+  onOrientationDetect,
   folder = 'homepage',
   aspectRatio = 'landscape',
 }: ImageUploadProps) {
@@ -73,7 +77,21 @@ export function ImageUpload({
         .from('site-images')
         .getPublicUrl(fileName)
 
-      onChange(urlData.publicUrl)
+      const publicUrl = urlData.publicUrl
+      onChange(publicUrl)
+
+      // Detect image orientation
+      if (onOrientationDetect) {
+        const img = new window.Image()
+        img.onload = () => {
+          const orientation: ImageOrientation =
+            img.width > img.height ? 'landscape' :
+            img.height > img.width ? 'portrait' :
+            'square'
+          onOrientationDetect(orientation)
+        }
+        img.src = publicUrl
+      }
     } catch (err) {
       console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : 'Upload mislukt')

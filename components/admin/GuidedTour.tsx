@@ -108,7 +108,7 @@ export function GuidedTour({ steps, isOpen, onClose, onComplete }: GuidedTourPro
   const step = steps[currentStep]
   const isLastStep = currentStep === steps.length - 1
 
-  // Calculate tooltip position
+  // Calculate tooltip position with viewport bounds checking
   const getTooltipStyle = (): React.CSSProperties => {
     if (!targetRect) {
       return {
@@ -120,42 +120,66 @@ export function GuidedTour({ steps, isOpen, onClose, onComplete }: GuidedTourPro
 
     const padding = 16
     const tooltipWidth = 320
-    const tooltipHeight = 180 // Approximate
+    const tooltipHeight = 200
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
 
-    const position = step.position || 'bottom'
+    // Calculate center of target
+    const targetCenterX = targetRect.left + targetRect.width / 2
+    const targetCenterY = targetRect.top + targetRect.height / 2
+
+    // Determine best position based on available space
+    let position = step.position || 'bottom'
+
+    // Check if there's enough space for the preferred position
+    const spaceAbove = targetRect.top
+    const spaceBelow = viewportHeight - targetRect.bottom
+    const spaceLeft = targetRect.left
+    const spaceRight = viewportWidth - targetRect.right
+
+    // Auto-adjust position if not enough space
+    if (position === 'bottom' && spaceBelow < tooltipHeight + padding) {
+      position = spaceAbove > spaceBelow ? 'top' : 'bottom'
+    } else if (position === 'top' && spaceAbove < tooltipHeight + padding) {
+      position = spaceBelow > spaceAbove ? 'bottom' : 'top'
+    } else if (position === 'right' && spaceRight < tooltipWidth + padding) {
+      position = spaceLeft > spaceRight ? 'left' : 'right'
+    } else if (position === 'left' && spaceLeft < tooltipWidth + padding) {
+      position = spaceRight > spaceLeft ? 'right' : 'left'
+    }
+
+    // Calculate base position
+    let top: number | undefined
+    let left: number | undefined
 
     switch (position) {
       case 'top':
-        return {
-          bottom: window.innerHeight - targetRect.top + padding,
-          left: targetRect.left + targetRect.width / 2,
-          transform: 'translateX(-50%)',
-        }
+        top = targetRect.top - tooltipHeight - padding
+        left = targetCenterX - tooltipWidth / 2
+        break
       case 'bottom':
-        return {
-          top: targetRect.bottom + padding,
-          left: targetRect.left + targetRect.width / 2,
-          transform: 'translateX(-50%)',
-        }
+        top = targetRect.bottom + padding
+        left = targetCenterX - tooltipWidth / 2
+        break
       case 'left':
-        return {
-          top: targetRect.top + targetRect.height / 2,
-          right: window.innerWidth - targetRect.left + padding,
-          transform: 'translateY(-50%)',
-        }
+        top = targetCenterY - tooltipHeight / 2
+        left = targetRect.left - tooltipWidth - padding
+        break
       case 'right':
-        return {
-          top: targetRect.top + targetRect.height / 2,
-          left: targetRect.right + padding,
-          transform: 'translateY(-50%)',
-        }
+        top = targetCenterY - tooltipHeight / 2
+        left = targetRect.right + padding
+        break
       default:
-        return {
-          top: targetRect.bottom + padding,
-          left: targetRect.left + targetRect.width / 2,
-          transform: 'translateX(-50%)',
-        }
+        top = targetRect.bottom + padding
+        left = targetCenterX - tooltipWidth / 2
     }
+
+    // Clamp to viewport bounds with margin
+    const margin = 16
+    top = Math.max(margin, Math.min(top, viewportHeight - tooltipHeight - margin))
+    left = Math.max(margin, Math.min(left, viewportWidth - tooltipWidth - margin))
+
+    return { top, left }
   }
 
   return createPortal(

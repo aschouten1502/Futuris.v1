@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import type { Direction, DirectionCompetency, DirectionTrait, Subject, Career, FurtherEducation } from '@/lib/types'
+import { AdaptiveDirectionImage } from '@/components/AdaptiveDirectionImage'
 
 interface LinkedSubject {
   subject_id: string
@@ -170,30 +171,60 @@ export function DirectionPreview({
           />
         </ClickableArea>
 
-        {/* Video embed */}
-        {embedUrl && (
-          <ClickableArea fieldId="video" className="mb-6">
-            <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 relative">
-              <iframe
-                src={embedUrl}
-                title="Video over deze richting"
-                className="w-full h-full pointer-events-none"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
-              <div className="absolute inset-0 bg-transparent" />
-            </div>
+        {/* Image with description - layout adapts to orientation */}
+        {direction.image_url ? (
+          <ClickableArea fieldId="header" className="mb-6">
+            <AdaptiveDirectionImage
+              src={direction.image_url}
+              alt={`Afbeelding van ${direction.name}`}
+              orientation={direction.image_orientation}
+              color={color}
+            >
+              {/* For portrait/square: description appears next to image */}
+              {direction.image_orientation !== 'landscape' && direction.full_description && (
+                <div className="prose prose-sm max-w-none text-text-muted">
+                  {direction.full_description.split('\n\n').map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+              )}
+            </AdaptiveDirectionImage>
+            {/* For landscape: description appears below image */}
+            {direction.image_orientation === 'landscape' && direction.full_description && (
+              <div className="prose prose-sm max-w-none text-text-muted mt-6">
+                {direction.full_description.split('\n\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            )}
           </ClickableArea>
-        )}
-
-        {/* Full description */}
-        {direction.full_description && (
-          <ClickableArea fieldId="full-description" className="mb-8">
-            <div className="prose prose-sm max-w-none text-text-muted">
-              {direction.full_description.split('\n\n').map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
-          </ClickableArea>
+        ) : (
+          <>
+            {/* Video fallback */}
+            {embedUrl && (
+              <ClickableArea fieldId="header" className="mb-6">
+                <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 relative">
+                  <iframe
+                    src={embedUrl}
+                    title="Video over deze richting"
+                    className="w-full h-full pointer-events-none"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
+                  <div className="absolute inset-0 bg-transparent" />
+                </div>
+              </ClickableArea>
+            )}
+            {/* Description when no image */}
+            {direction.full_description && (
+              <ClickableArea fieldId="full-description" className="mb-8">
+                <div className="prose prose-sm max-w-none text-text-muted">
+                  {direction.full_description.split('\n\n').map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+              </ClickableArea>
+            )}
+          </>
         )}
 
         {/* === D&P LAYOUT === */}
@@ -201,7 +232,7 @@ export function DirectionPreview({
           <>
             {/* D&P Modules */}
             {competencies.length > 0 && (
-              <ClickableArea fieldId="modules" className="mb-8">
+              <ClickableArea fieldId="modules" className="mb-4">
                 <section>
                   <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
                     <span
@@ -233,6 +264,16 @@ export function DirectionPreview({
                     ))}
                   </div>
                 </section>
+              </ClickableArea>
+            )}
+
+            {/* Link naar D&P modules pagina */}
+            {competencies.length > 0 && (
+              <ClickableArea fieldId="linkteksten" className="mb-8">
+                <div className="flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group cursor-pointer">
+                  <span>{direction.dp_modules_link_text || 'Lees meer over de vier D&P modules'}</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
               </ClickableArea>
             )}
 
@@ -272,7 +313,7 @@ export function DirectionPreview({
 
             {/* Passende vakken bij deze richting */}
             {fittingSubjects.length > 0 && (
-              <ClickableArea fieldId="subjects" className="mb-8">
+              <ClickableArea fieldId="subjects" className="mb-4">
                 <section>
                   <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
                     <span
@@ -312,6 +353,16 @@ export function DirectionPreview({
                     ))}
                   </div>
                 </section>
+              </ClickableArea>
+            )}
+
+            {/* Link naar keuzevakken */}
+            {fittingSubjects.length > 0 && (
+              <ClickableArea fieldId="linkteksten" className="mb-8">
+                <div className="flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group cursor-pointer">
+                  <span>{direction.keuzevakken_link_text || 'Bekijk alle beschikbare keuzevakken'}</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
               </ClickableArea>
             )}
 
@@ -538,7 +589,7 @@ export function DirectionPreview({
 
             {/* Subjects */}
             {subjectsWithDetails.length > 0 && (
-              <ClickableArea fieldId="subjects" className="mb-8">
+              <ClickableArea fieldId="subjects" className="mb-4">
                 <section>
                   <h2 className="text-lg font-bold text-text mb-4 flex items-center gap-3">
                     <span
@@ -571,6 +622,16 @@ export function DirectionPreview({
                     ))}
                   </div>
                 </section>
+              </ClickableArea>
+            )}
+
+            {/* Link naar keuzevakken - Mavo */}
+            {subjectsWithDetails.length > 0 && (
+              <ClickableArea fieldId="linkteksten" className="mb-8">
+                <div className="flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group cursor-pointer">
+                  <span>{direction.keuzevakken_link_text || 'Bekijk alle beschikbare keuzevakken'}</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </div>
               </ClickableArea>
             )}
 

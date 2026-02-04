@@ -155,7 +155,7 @@ export default async function AdminDashboard() {
             <ol className="mt-2 space-y-1.5 text-gray-700 list-decimal list-inside text-sm">
               <li>Ga naar <Link href="/admin/directions" className="text-primary-600 hover:underline font-medium">Richtingen</Link></li>
               <li>Klik op <strong>&quot;Bewerken&quot;</strong> bij de richting</li>
-              <li>Aan de linkerkant: vul de basisgegevens in (naam, beschrijving, video, kleur)</li>
+              <li>Aan de linkerkant: vul de basisgegevens in (naam, beschrijving, afbeelding, kleur)</li>
               <li>Klap de secties open om modules, eigenschappen, vakken, beroepen en opleidingen toe te voegen</li>
               <li>Aan de rechterkant: bekijk direct hoe de pagina eruitziet (live preview)</li>
               <li>Klik op een onderdeel in de preview om naar dat veld te springen</li>

@@ -506,3 +506,82 @@ export async function updateSiteSetting(key: string, value: string | null): Prom
     throw new Error('Kon instelling niet opslaan')
   }
 }
+
+export interface InfoBoxSettings {
+  dpModules: {
+    title: string
+    description: string
+    icon: string
+  }
+  keuzevakken: {
+    title: string
+    description: string
+    icon: string
+  }
+}
+
+export async function getInfoBoxSettings(): Promise<InfoBoxSettings> {
+  const settings = await getSiteSettings()
+
+  const getValue = (key: string, fallback: string = '') => {
+    const setting = settings.find(s => s.key === key)
+    return setting?.value || fallback
+  }
+
+  return {
+    dpModules: {
+      title: getValue('dp_modules_title', 'D&P Modules'),
+      description: getValue('dp_modules_description', 'D&P staat voor "Dienstverlening en Producten". Leer meer over de verplichte modules die je voorbereiden op je toekomst.'),
+      icon: getValue('dp_modules_icon', '📋'),
+    },
+    keuzevakken: {
+      title: getValue('keuzevakken_title', 'Keuzevakken'),
+      description: getValue('keuzevakken_description', 'Naast de verplichte vakken mag je twee keuzevakken kiezen. Bekijk alle beschikbare keuzevakken.'),
+      icon: getValue('keuzevakken_icon', '📚'),
+    },
+  }
+}
+
+// ============================================
+// D&P MODULES
+// ============================================
+
+export interface DPModule {
+  id: string
+  title: string
+  description: string | null
+  icon: string | null
+  order: number
+  created_at?: string
+  updated_at?: string
+}
+
+export async function getDPModules(): Promise<DPModule[]> {
+  const { data, error } = await supabase
+    .from('dp_modules')
+    .select('*')
+    .order('order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching D&P modules:', error)
+    throw new Error('Kon D&P modules niet laden')
+  }
+
+  return data || []
+}
+
+export async function getDPModuleById(id: string): Promise<DPModule | null> {
+  const { data, error } = await supabase
+    .from('dp_modules')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') return null
+    console.error('Error fetching D&P module:', error)
+    throw new Error('Kon D&P module niet laden')
+  }
+
+  return data
+}

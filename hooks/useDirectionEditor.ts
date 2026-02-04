@@ -32,12 +32,15 @@ const emptyDirection: Omit<Direction, 'id' | 'created_at' | 'updated_at'> = {
   full_description: null,
   video_url: null,
   image_url: null,
+  image_orientation: null,
   color: '#003c46',
   icon: null,
   order: 0,
   is_active: true,
   category: 'dp',
   careers_intro: null,
+  dp_modules_link_text: null,
+  keuzevakken_link_text: null,
 }
 
 export function useDirectionEditor(directionId: string) {
@@ -280,11 +283,14 @@ export function useDirectionEditor(directionId: string) {
             full_description: direction.full_description,
             video_url: direction.video_url,
             image_url: direction.image_url,
+            image_orientation: direction.image_orientation,
             color: direction.color,
             icon: direction.icon,
             is_active: direction.is_active,
             category: direction.category || 'dp',
             careers_intro: direction.careers_intro,
+            dp_modules_link_text: direction.dp_modules_link_text,
+            keuzevakken_link_text: direction.keuzevakken_link_text,
             order: direction.order,
           })
           .select('id')
@@ -303,11 +309,14 @@ export function useDirectionEditor(directionId: string) {
             full_description: direction.full_description,
             video_url: direction.video_url,
             image_url: direction.image_url,
+            image_orientation: direction.image_orientation,
             color: direction.color,
             icon: direction.icon,
             is_active: direction.is_active,
             category: direction.category || 'dp',
             careers_intro: direction.careers_intro,
+            dp_modules_link_text: direction.dp_modules_link_text,
+            keuzevakken_link_text: direction.keuzevakken_link_text,
             updated_at: new Date().toISOString(),
           })
           .eq('id', currentId)

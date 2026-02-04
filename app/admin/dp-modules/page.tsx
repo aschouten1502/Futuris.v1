@@ -2,31 +2,38 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Subject } from '@/lib/types'
 import { Toast, useToast } from '@/components/ui/Toast'
 import { UndoToast } from '@/components/ui/UndoToast'
 import { EmojiPicker } from '@/components/admin/shared/EmojiPicker'
 
+interface DPModule {
+  id: string
+  title: string
+  description: string | null
+  icon: string | null
+  order: number
+  created_at?: string
+  updated_at?: string
+}
+
 interface UndoState {
   type: 'delete' | 'edit'
-  item: Subject
-  previousData?: Partial<Subject>
+  item: DPModule
+  previousData?: Partial<DPModule>
 }
 
 interface EditModalProps {
-  subject: Subject | null
+  module: DPModule | null
   isNew: boolean
   onClose: () => void
-  onSave: (data: Partial<Subject>) => void
+  onSave: (data: Partial<DPModule>) => void
 }
 
-function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
+function EditModal({ module, isNew, onClose, onSave }: EditModalProps) {
   const [form, setForm] = useState({
-    name: subject?.name || '',
-    description: subject?.description || '',
-    icon: subject?.icon || '',
-    learning_goals: subject?.learning_goals || '',
-    topics: subject?.topics || '',
+    title: module?.title || '',
+    description: module?.description || '',
+    icon: module?.icon || '',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +46,7 @@ function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">
-            {isNew ? 'Nieuw vak' : 'Vak bewerken'}
+            {isNew ? 'Nieuwe module' : 'Module bewerken'}
           </h2>
         </div>
 
@@ -53,12 +60,12 @@ function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
               />
             </div>
             <div className="col-span-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Naam *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
               <input
                 type="text"
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                placeholder="Naam van het vak"
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                placeholder="Naam van de module"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 required
               />
@@ -66,42 +73,14 @@ function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Korte beschrijving</label>
-            <input
-              type="text"
+            <label className="block text-sm font-medium text-gray-700 mb-1">Beschrijving</label>
+            <textarea
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder="Een korte beschrijving van het vak"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Wat leer je bij dit vak?
-            </label>
-            <textarea
-              value={form.learning_goals}
-              onChange={e => setForm({ ...form, learning_goals: e.target.value })}
-              placeholder="• Leerdoel 1&#10;• Leerdoel 2&#10;• Leerdoel 3"
+              placeholder="Beschrijving van de module..."
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
-            <p className="text-xs text-gray-500 mt-1">Gebruik bullet points (•) voor een mooie lijst</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Onderwerpen die aan bod komen
-            </label>
-            <textarea
-              value={form.topics}
-              onChange={e => setForm({ ...form, topics: e.target.value })}
-              placeholder="Onderwerp 1, Onderwerp 2, Onderwerp 3"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            />
-            <p className="text-xs text-gray-500 mt-1">Komma-gescheiden of op aparte regels</p>
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-gray-200">
@@ -125,26 +104,26 @@ function EditModal({ subject, isNew, onClose, onSave }: EditModalProps) {
   )
 }
 
-export default function SubjectsPage() {
-  const [subjects, setSubjects] = useState<Subject[]>([])
+export default function DPModulesPage() {
+  const [modules, setModules] = useState<DPModule[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
+  const [editingModule, setEditingModule] = useState<DPModule | null>(null)
   const [showNewModal, setShowNewModal] = useState(false)
   const [previewKey, setPreviewKey] = useState(() => Date.now())
   const [undoState, setUndoState] = useState<UndoState | null>(null)
   const { toast, showToast, hideToast } = useToast()
   const supabase = createClient()
 
-  const fetchSubjects = async () => {
+  const fetchModules = async () => {
     const { data, error } = await supabase
-      .from('subjects')
+      .from('dp_modules')
       .select('*')
       .order('order', { ascending: true })
 
     if (error) {
-      showToast('Fout bij laden vakken', 'error')
+      showToast('Fout bij laden modules', 'error')
     } else {
-      setSubjects(data || [])
+      setModules(data || [])
     }
     setLoading(false)
   }
@@ -154,96 +133,88 @@ export default function SubjectsPage() {
   }
 
   useEffect(() => {
-    fetchSubjects()
+    fetchModules()
   }, [])
 
   // Listen for click events from the preview iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'edit-subject') {
-        const subject = subjects.find(s => s.id === event.data.id)
-        if (subject) setEditingSubject(subject)
+      if (event.data?.type === 'edit-dp-module') {
+        const module = modules.find(m => m.id === event.data.id)
+        if (module) setEditingModule(module)
       }
     }
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [subjects])
+  }, [modules])
 
-  const handleCreate = async (data: Partial<Subject>) => {
-    if (!data.name?.trim()) {
-      showToast('Vul een naam in', 'error')
+  const handleCreate = async (data: Partial<DPModule>) => {
+    if (!data.title?.trim()) {
+      showToast('Vul een titel in', 'error')
       return
     }
 
-    const { error } = await supabase.from('subjects').insert({
-      name: data.name,
+    const { error } = await supabase.from('dp_modules').insert({
+      title: data.title,
       description: data.description || null,
       icon: data.icon || null,
-      learning_goals: data.learning_goals || null,
-      topics: data.topics || null,
-      order: subjects.length,
+      order: modules.length + 1,
     })
 
     if (error) {
       showToast('Fout bij aanmaken', 'error')
     } else {
-      showToast('Vak aangemaakt', 'success')
+      showToast('Module aangemaakt', 'success')
       setShowNewModal(false)
-      fetchSubjects()
+      fetchModules()
       refreshPreview()
     }
   }
 
-  const handleUpdate = async (data: Partial<Subject>) => {
-    if (!editingSubject || !data.name?.trim()) {
-      showToast('Vul een naam in', 'error')
+  const handleUpdate = async (data: Partial<DPModule>) => {
+    if (!editingModule || !data.title?.trim()) {
+      showToast('Vul een titel in', 'error')
       return
     }
 
     // Store previous data for undo
-    const previousData: Partial<Subject> = {
-      name: editingSubject.name,
-      description: editingSubject.description,
-      icon: editingSubject.icon,
-      learning_goals: editingSubject.learning_goals,
-      topics: editingSubject.topics,
+    const previousData: Partial<DPModule> = {
+      title: editingModule.title,
+      description: editingModule.description,
+      icon: editingModule.icon,
     }
 
     const { error } = await supabase
-      .from('subjects')
+      .from('dp_modules')
       .update({
-        name: data.name,
+        title: data.title,
         description: data.description || null,
         icon: data.icon || null,
-        learning_goals: data.learning_goals || null,
-        topics: data.topics || null,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', editingSubject.id)
+      .eq('id', editingModule.id)
 
     if (error) {
       showToast('Fout bij opslaan', 'error')
     } else {
-      // Show undo toast instead of regular toast
-      setUndoState({ type: 'edit', item: editingSubject, previousData })
-      setEditingSubject(null)
-      fetchSubjects()
+      setUndoState({ type: 'edit', item: editingModule, previousData })
+      setEditingModule(null)
+      fetchModules()
       refreshPreview()
     }
   }
 
   const handleDelete = async (id: string) => {
-    const subjectToDelete = subjects.find(s => s.id === id)
-    if (!subjectToDelete) return
+    const moduleToDelete = modules.find(m => m.id === id)
+    if (!moduleToDelete) return
 
-    const { error } = await supabase.from('subjects').delete().eq('id', id)
+    const { error } = await supabase.from('dp_modules').delete().eq('id', id)
 
     if (error) {
       showToast('Fout bij verwijderen', 'error')
     } else {
-      // Show undo toast instead of regular toast
-      setUndoState({ type: 'delete', item: subjectToDelete })
-      fetchSubjects()
+      setUndoState({ type: 'delete', item: moduleToDelete })
+      fetchModules()
       refreshPreview()
     }
   }
@@ -252,14 +223,11 @@ export default function SubjectsPage() {
     if (!undoState) return
 
     if (undoState.type === 'delete') {
-      // Restore deleted item
-      const { error } = await supabase.from('subjects').insert({
+      const { error } = await supabase.from('dp_modules').insert({
         id: undoState.item.id,
-        name: undoState.item.name,
+        title: undoState.item.title,
         description: undoState.item.description,
         icon: undoState.item.icon,
-        learning_goals: undoState.item.learning_goals,
-        topics: undoState.item.topics,
         order: undoState.item.order,
         created_at: undoState.item.created_at,
         updated_at: undoState.item.updated_at,
@@ -268,14 +236,13 @@ export default function SubjectsPage() {
       if (error) {
         showToast('Fout bij herstellen', 'error')
       } else {
-        showToast('Vak hersteld', 'success')
-        fetchSubjects()
+        showToast('Module hersteld', 'success')
+        fetchModules()
         refreshPreview()
       }
     } else if (undoState.type === 'edit' && undoState.previousData) {
-      // Restore previous data
       const { error } = await supabase
-        .from('subjects')
+        .from('dp_modules')
         .update({
           ...undoState.previousData,
           updated_at: new Date().toISOString(),
@@ -286,7 +253,7 @@ export default function SubjectsPage() {
         showToast('Fout bij herstellen', 'error')
       } else {
         showToast('Wijziging ongedaan gemaakt', 'success')
-        fetchSubjects()
+        fetchModules()
         refreshPreview()
       }
     }
@@ -298,13 +265,13 @@ export default function SubjectsPage() {
 
   return (
     <div className="flex gap-6">
-      {/* Left side - Subject editor */}
+      {/* Left side - Module editor */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Keuzevakken</h1>
+            <h1 className="text-2xl font-bold text-gray-900">D&P Modules</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Beheer alle keuzevakken met beschrijvingen.
+              Beheer de verplichte D&P modules.
             </p>
           </div>
           <button
@@ -312,40 +279,43 @@ export default function SubjectsPage() {
             onClick={() => setShowNewModal(true)}
             className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
           >
-            + Nieuw vak
+            + Nieuwe module
           </button>
         </div>
 
-        {subjects.length === 0 ? (
+        {modules.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
-            Nog geen vakken aangemaakt.
+            Nog geen modules aangemaakt.
           </div>
         ) : (
-          <div className="grid gap-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-            {subjects.map((subject) => (
+          <div className="grid gap-3">
+            {modules.map((module, index) => (
               <div
-                key={subject.id}
+                key={module.id}
                 className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl">{subject.icon || '📖'}</div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-xl shrink-0">
+                    {module.icon || '📋'}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900">{subject.name}</h3>
-                    {subject.description && (
-                      <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{subject.description}</p>
+                    <span className="text-xs font-medium text-gray-400">Module {index + 1}</span>
+                    <h3 className="font-semibold text-gray-900">{module.title}</h3>
+                    {module.description && (
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{module.description}</p>
                     )}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={() => setEditingSubject(subject)}
+                      onClick={() => setEditingModule(module)}
                       className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                     >
                       Bewerken
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(subject.id)}
+                      onClick={() => handleDelete(module.id)}
                       className="text-red-600 hover:text-red-700 font-medium text-sm"
                     >
                       Verwijderen
@@ -387,8 +357,8 @@ export default function SubjectsPage() {
             <div className="h-[600px] overflow-hidden">
               <iframe
                 key={previewKey}
-                src={`/vakken?_t=${previewKey}`}
-                title="Preview Keuzevakken"
+                src={`/dp-modules?_t=${previewKey}`}
+                title="Preview D&P Modules"
                 className="w-full h-full border-0"
                 style={{ transform: 'scale(0.55)', transformOrigin: 'top left', width: '182%', height: '182%' }}
               />
@@ -398,11 +368,11 @@ export default function SubjectsPage() {
       </div>
 
       {/* Edit Modal */}
-      {editingSubject && (
+      {editingModule && (
         <EditModal
-          subject={editingSubject}
+          module={editingModule}
           isNew={false}
-          onClose={() => setEditingSubject(null)}
+          onClose={() => setEditingModule(null)}
           onSave={handleUpdate}
         />
       )}
@@ -410,7 +380,7 @@ export default function SubjectsPage() {
       {/* New Modal */}
       {showNewModal && (
         <EditModal
-          subject={null}
+          module={null}
           isNew={true}
           onClose={() => setShowNewModal(false)}
           onSave={handleCreate}
@@ -422,7 +392,7 @@ export default function SubjectsPage() {
       {/* Undo Toast */}
       {undoState && (
         <UndoToast
-          message={undoState.type === 'delete' ? `"${undoState.item.name}" verwijderd` : `"${undoState.item.name}" bijgewerkt`}
+          message={undoState.type === 'delete' ? `"${undoState.item.title}" verwijderd` : `"${undoState.item.title}" bijgewerkt`}
           onUndo={handleUndo}
           onDismiss={() => setUndoState(null)}
         />

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { getDirectionWithDetails, getDirections } from '@/lib/data'
 import PublicLayout from '@/components/PublicLayout'
 import { SubjectChip } from '@/components/SubjectChip'
+import { AdaptiveDirectionImage } from '@/components/AdaptiveDirectionImage'
 import type { Metadata } from 'next'
 
 // Convert various YouTube URL formats to embed URL
@@ -109,29 +110,60 @@ export default async function DirectionPage({ params }: PageProps) {
           style={{ backgroundColor: direction.color }}
         />
 
-        {/* Video embed */}
-        {direction.video_url && (() => {
-          const embedUrl = getYouTubeEmbedUrl(direction.video_url)
-          return embedUrl ? (
-            <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 mt-6">
-              <iframe
-                src={embedUrl}
-                title="Video over deze richting"
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          ) : null
-        })()}
-
-        {/* Full description */}
-        {direction.full_description && (
-          <div className="prose prose-sm max-w-none text-text-muted mt-6">
-            {direction.full_description.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
+        {/* Image with description - layout adapts to orientation */}
+        {direction.image_url ? (
+          <div className="mt-6">
+            <AdaptiveDirectionImage
+              src={direction.image_url}
+              alt={`Afbeelding van ${direction.name}`}
+              orientation={direction.image_orientation}
+              color={direction.color}
+              priority
+            >
+              {/* For portrait/square: description appears next to image */}
+              {direction.image_orientation !== 'landscape' && direction.full_description && (
+                <div className="prose prose-sm max-w-none text-text-muted">
+                  {direction.full_description.split('\n\n').map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+              )}
+            </AdaptiveDirectionImage>
+            {/* For landscape: description appears below image */}
+            {direction.image_orientation === 'landscape' && direction.full_description && (
+              <div className="prose prose-sm max-w-none text-text-muted mt-6">
+                {direction.full_description.split('\n\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            )}
           </div>
+        ) : (
+          <>
+            {/* Video fallback */}
+            {direction.video_url ? (() => {
+              const embedUrl = getYouTubeEmbedUrl(direction.video_url)
+              return embedUrl ? (
+                <div className="aspect-video rounded-xl overflow-hidden bg-gray-100 mt-6">
+                  <iframe
+                    src={embedUrl}
+                    title="Video over deze richting"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : null
+            })() : null}
+            {/* Description when no image */}
+            {direction.full_description && (
+              <div className="prose prose-sm max-w-none text-text-muted mt-6">
+                {direction.full_description.split('\n\n').map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -170,6 +202,14 @@ export default async function DirectionPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
+              {/* Link naar D&P modules pagina */}
+              <Link
+                href="/dp-modules"
+                className="mt-4 flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group"
+              >
+                <span>{direction.dp_modules_link_text || 'Lees meer over de vier D&P modules'}</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </section>
           )}
 
@@ -247,6 +287,14 @@ export default async function DirectionPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
+              {/* Link naar alle keuzevakken */}
+              <Link
+                href="/vakken"
+                className="mt-4 flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group"
+              >
+                <span>{direction.keuzevakken_link_text || 'Bekijk alle beschikbare keuzevakken'}</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </section>
           )}
 
@@ -515,6 +563,14 @@ export default async function DirectionPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
+              {/* Link naar alle keuzevakken */}
+              <Link
+                href="/vakken"
+                className="mt-4 flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group"
+              >
+                <span>{direction.keuzevakken_link_text || 'Bekijk alle beschikbare keuzevakken'}</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </section>
           )}
 
@@ -573,6 +629,14 @@ export default async function DirectionPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
+              {/* Link naar alle keuzevakken */}
+              <Link
+                href="/vakken"
+                className="mt-4 flex items-center gap-2 text-sm text-futuris-teal hover:text-futuris-teal/80 font-medium transition-colors group"
+              >
+                <span>{direction.keuzevakken_link_text || 'Bekijk alle beschikbare keuzevakken'}</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </section>
           )}
 

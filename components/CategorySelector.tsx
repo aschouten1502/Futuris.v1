@@ -1,15 +1,30 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import type { Direction } from '@/lib/types'
 import { DirectionCard } from './DirectionCard'
+
+interface InfoBoxSettings {
+  dpModules: {
+    title: string
+    description: string
+    icon: string
+  }
+  keuzevakken: {
+    title: string
+    description: string
+    icon: string
+  }
+}
 
 interface CategorySelectorProps {
   dpDirections: Direction[]
   mavoDirections: Direction[]
+  infoBoxSettings: InfoBoxSettings
 }
 
-export function CategorySelector({ dpDirections, mavoDirections }: CategorySelectorProps) {
+export function CategorySelector({ dpDirections, mavoDirections, infoBoxSettings }: CategorySelectorProps) {
   const [selectedCategory, setSelectedCategory] = useState<'dp' | 'mavo' | null>(null)
 
   const categories = [
@@ -126,6 +141,45 @@ export function CategorySelector({ dpDirections, mavoDirections }: CategorySelec
             {selectedCat.directions.map((direction) => (
               <DirectionCard key={direction.id} direction={direction} />
             ))}
+          </div>
+
+          {/* Info boxes - conditioneel per categorie */}
+          <div className={`mt-6 grid gap-3 ${selectedCategory === 'dp' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {/* D&P Modules - alleen bij D&P */}
+            {selectedCategory === 'dp' && (
+              <Link href="/dp-modules" className="block group">
+                <div className="p-4 bg-surface-lavender-light rounded-xl border border-surface-lavender/30 hover:border-futuris-teal/40 hover:shadow-md transition-all h-full">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-futuris-teal mb-1 flex items-center gap-2 text-sm">
+                        <span>{infoBoxSettings.dpModules.icon}</span> {infoBoxSettings.dpModules.title}
+                      </h3>
+                      <p className="text-xs text-text-muted leading-relaxed">
+                        {infoBoxSettings.dpModules.description}
+                      </p>
+                    </div>
+                    <span className="text-futuris-teal group-hover:translate-x-1 transition-transform shrink-0">→</span>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* Keuzevakken - bij beide categorieën */}
+            <Link href="/vakken" className="block group">
+              <div className="p-4 bg-surface-sage-light rounded-xl border border-surface-sage/30 hover:border-futuris-teal/40 hover:shadow-md transition-all h-full">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-futuris-teal mb-1 flex items-center gap-2 text-sm">
+                      <span>{infoBoxSettings.keuzevakken.icon}</span> {infoBoxSettings.keuzevakken.title}
+                    </h3>
+                    <p className="text-xs text-text-muted leading-relaxed">
+                      {infoBoxSettings.keuzevakken.description}
+                    </p>
+                  </div>
+                  <span className="text-futuris-teal group-hover:translate-x-1 transition-transform shrink-0">→</span>
+                </div>
+              </div>
+            </Link>
           </div>
         </section>
       )}

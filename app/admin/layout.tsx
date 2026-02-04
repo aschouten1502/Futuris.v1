@@ -33,6 +33,7 @@ const navGroups: NavGroup[] = [
       { href: '/admin/subjects', label: 'Vakken' },
       { href: '/admin/careers', label: 'Beroepen' },
       { href: '/admin/education', label: 'Opleidingen' },
+      { href: '/admin/dp-modules', label: 'D&P Modules' },
     ],
   },
 ]

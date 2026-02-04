@@ -12,12 +12,15 @@ export interface Direction {
   full_description: string | null
   video_url: string | null
   image_url: string | null
+  image_orientation: 'landscape' | 'portrait' | 'square' | null
   color: string
   icon: string | null
   order: number
   is_active: boolean
   category: 'dp' | 'mavo'
   careers_intro: string | null
+  dp_modules_link_text: string | null
+  keuzevakken_link_text: string | null
   created_at?: string
   updated_at?: string
 }
@@ -109,6 +112,16 @@ export interface DirectionEducation {
   education?: FurtherEducation
 }
 
+export interface DPModule {
+  id: string
+  title: string
+  description: string | null
+  icon: string | null
+  order: number
+  created_at?: string
+  updated_at?: string
+}
+
 // ============================================
 // JOINED TYPES (voor detail pagina's)
 // ============================================
@@ -138,6 +151,7 @@ export interface DirectionFormData {
   full_description: string
   video_url: string
   image_url: string
+  image_orientation: 'landscape' | 'portrait' | 'square' | null
   color: string
   icon: string
   order: number

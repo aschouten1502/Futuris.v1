@@ -13,6 +13,7 @@ import { SubjectsModule } from '@/components/admin/modules/SubjectsModule'
 import { CareersModule } from '@/components/admin/modules/CareersModule'
 import { EducationModule } from '@/components/admin/modules/EducationModule'
 import { GuidedTour, TourStep } from '@/components/admin/GuidedTour'
+import { TourButton } from '@/components/admin/TourButton'
 
 export default function EditDirectionPage() {
   const router = useRouter()
@@ -30,7 +31,7 @@ export default function EditDirectionPage() {
     {
       target: '[data-tour="basic-info"]',
       title: 'Algemene informatie',
-      description: 'Hier vul je de basisgegevens in: naam, beschrijving, video, kleur en icoon van de richting.',
+      description: 'Hier vul je de basisgegevens in: naam, beschrijving, afbeelding, kleur en icoon van de richting.',
       position: 'right',
     },
     {
@@ -146,7 +147,7 @@ export default function EditDirectionPage() {
   const contentItems = [
     { label: 'Naam', value: direction.name || '—' },
     { label: 'Beschrijving', done: !!direction.full_description },
-    { label: 'Video', done: !!direction.video_url },
+    { label: 'Afbeelding', done: !!direction.image_url },
     { label: 'Icoon', value: direction.icon || '—' },
     { label: 'Modules', count: competencies.length },
     { label: 'Eigenschappen', count: traits.length },
@@ -363,19 +364,7 @@ export default function EditDirectionPage() {
             </div>
 
             {/* Tour Button */}
-            <button
-              type="button"
-              onClick={() => setTourOpen(true)}
-              className="w-full bg-white rounded-xl border border-gray-200 p-3 text-left hover:border-primary-300 hover:bg-primary-50/50 transition-colors group"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🎯</span>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 group-hover:text-primary-700">Rondleiding</p>
-                  <p className="text-xs text-gray-500">Leer hoe alles werkt</p>
-                </div>
-              </div>
-            </button>
+            <TourButton onClick={() => setTourOpen(true)} variant="sidebar" />
           </div>
         </div>
       </div>
